@@ -7,11 +7,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 import type { DateSelectArg, EventClickArg, EventDropArg, EventInput } from "@fullcalendar/core";
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 
-import "@fullcalendar/core/index.css";
-import "@fullcalendar/daygrid/index.css";
-import "@fullcalendar/timegrid/index.css";
-import "@fullcalendar/list/index.css";
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
