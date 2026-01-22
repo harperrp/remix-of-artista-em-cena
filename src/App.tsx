@@ -10,8 +10,11 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import { OrgProvider } from "@/providers/OrgProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppShell } from "@/components/layout/AppShell";
-import { LeadsPage } from "@/pages/Leads";
-import { ContractsPage } from "@/pages/Contracts";
+import { DashboardPage } from "@/pages/Dashboard";
+import { LeadsKanbanPage } from "@/pages/LeadsKanban";
+import { ContractsCrudPage } from "@/pages/ContractsCrud";
+import { MapViewPage } from "@/pages/MapView";
+import { FinancialPage } from "@/pages/Financial";
 import { ArtistCalendarPage } from "@/components/artist-calendar/ArtistCalendarPage";
 
 const queryClient = new QueryClient();
@@ -30,13 +33,16 @@ const App = () => (
 
               <Route element={<ProtectedRoute />}>
                 <Route path="/app" element={<AppShell />}>
+                  <Route index element={<DashboardPage />} />
+                  <Route path="dashboard" element={<DashboardPage />} />
                   <Route path="calendar" element={<ArtistCalendarPage />} />
-                  <Route path="leads" element={<LeadsPage />} />
-                  <Route path="contracts" element={<ContractsPage />} />
+                  <Route path="leads" element={<LeadsKanbanPage />} />
+                  <Route path="contracts" element={<ContractsCrudPage />} />
+                  <Route path="map" element={<MapViewPage />} />
+                  <Route path="financial" element={<FinancialPage />} />
                 </Route>
               </Route>
 
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -19,12 +19,15 @@ export type Database = {
           city: string | null
           contract_id: string | null
           contract_status: Database["public"]["Enums"]["contract_status"] | null
+          contractor_name: string | null
           created_at: string
           created_by: string
           end_time: string | null
           fee: number | null
           id: string
+          latitude: number | null
           lead_id: string | null
+          longitude: number | null
           notes: string | null
           organization_id: string
           stage: Database["public"]["Enums"]["funnel_stage"] | null
@@ -33,6 +36,7 @@ export type Database = {
           status: Database["public"]["Enums"]["event_status"]
           title: string
           updated_at: string
+          venue_name: string | null
         }
         Insert: {
           city?: string | null
@@ -40,12 +44,15 @@ export type Database = {
           contract_status?:
             | Database["public"]["Enums"]["contract_status"]
             | null
+          contractor_name?: string | null
           created_at?: string
           created_by: string
           end_time?: string | null
           fee?: number | null
           id?: string
+          latitude?: number | null
           lead_id?: string | null
+          longitude?: number | null
           notes?: string | null
           organization_id: string
           stage?: Database["public"]["Enums"]["funnel_stage"] | null
@@ -54,6 +61,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["event_status"]
           title: string
           updated_at?: string
+          venue_name?: string | null
         }
         Update: {
           city?: string | null
@@ -61,12 +69,15 @@ export type Database = {
           contract_status?:
             | Database["public"]["Enums"]["contract_status"]
             | null
+          contractor_name?: string | null
           created_at?: string
           created_by?: string
           end_time?: string | null
           fee?: number | null
           id?: string
+          latitude?: number | null
           lead_id?: string | null
+          longitude?: number | null
           notes?: string | null
           organization_id?: string
           stage?: Database["public"]["Enums"]["funnel_stage"] | null
@@ -75,6 +86,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["event_status"]
           title?: string
           updated_at?: string
+          venue_name?: string | null
         }
         Relationships: [
           {
@@ -105,9 +117,11 @@ export type Database = {
           created_at: string
           created_by: string
           document_url: string | null
+          fee: number | null
           id: string
           lead_id: string
           organization_id: string
+          payment_method: string | null
           status: Database["public"]["Enums"]["contract_status"]
           updated_at: string
         }
@@ -115,9 +129,11 @@ export type Database = {
           created_at?: string
           created_by: string
           document_url?: string | null
+          fee?: number | null
           id?: string
           lead_id: string
           organization_id: string
+          payment_method?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
           updated_at?: string
         }
@@ -125,9 +141,11 @@ export type Database = {
           created_at?: string
           created_by?: string
           document_url?: string | null
+          fee?: number | null
           id?: string
           lead_id?: string
           organization_id?: string
+          payment_method?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
           updated_at?: string
         }
@@ -154,48 +172,63 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           contractor_name: string
+          contractor_type: string | null
           created_at: string
           created_by: string
+          event_date: string | null
           fee: number | null
           id: string
+          latitude: number | null
+          longitude: number | null
           notes: string | null
           organization_id: string
           origin: string | null
           stage: Database["public"]["Enums"]["funnel_stage"]
           state: string | null
           updated_at: string
+          venue_name: string | null
         }
         Insert: {
           city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           contractor_name: string
+          contractor_type?: string | null
           created_at?: string
           created_by: string
+          event_date?: string | null
           fee?: number | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           notes?: string | null
           organization_id: string
           origin?: string | null
           stage?: Database["public"]["Enums"]["funnel_stage"]
           state?: string | null
           updated_at?: string
+          venue_name?: string | null
         }
         Update: {
           city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           contractor_name?: string
+          contractor_type?: string | null
           created_at?: string
           created_by?: string
+          event_date?: string | null
           fee?: number | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           notes?: string | null
           organization_id?: string
           origin?: string | null
           stage?: Database["public"]["Enums"]["funnel_stage"]
           state?: string | null
           updated_at?: string
+          venue_name?: string | null
         }
         Relationships: [
           {
