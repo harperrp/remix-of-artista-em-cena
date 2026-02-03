@@ -29,20 +29,15 @@ const App = () => (
         <OrgProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-
-              <Route element={<ProtectedRoute />}>
-                <Route path="/app" element={<AppShell />}>
-                  <Route index element={<DashboardPage />} />
-                  <Route path="dashboard" element={<DashboardPage />} />
-                  <Route path="calendar" element={<ArtistCalendarPage />} />
-                  <Route path="leads" element={<LeadsKanbanPage />} />
-                  <Route path="contracts" element={<ContractsCrudPage />} />
-                  <Route path="contacts" element={<ContactsPage />} />
-                  <Route path="map" element={<MapViewPage />} />
-                  <Route path="financial" element={<FinancialPage />} />
-                </Route>
+              <Route path="/" element={<AppShell />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="calendar" element={<ArtistCalendarPage />} />
+                <Route path="leads" element={<LeadsKanbanPage />} />
+                <Route path="contracts" element={<ContractsCrudPage />} />
+                <Route path="contacts" element={<ContactsPage />} />
+                <Route path="map" element={<MapViewPage />} />
+                <Route path="financial" element={<FinancialPage />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
