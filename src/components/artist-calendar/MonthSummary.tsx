@@ -1,4 +1,4 @@
-import { CalendarDays, Handshake, MapPin, Sparkles, Wallet } from "lucide-react";
+import { CalendarDays, Handshake, MapPin, Sparkles, TrendingUp, Wallet } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatMoneyBRL, monthStats } from "@/lib/calendar-utils";
@@ -9,30 +9,42 @@ type Props = {
   events: CalendarEvent[];
 };
 
-function StatPill({
+const statusDot: Record<string, string> = {
+  confirmed: "bg-status-confirmed",
+  negotiation: "bg-status-negotiation",
+  free: "bg-status-free",
+  revenue: "bg-brand-2",
+};
+
+function StatCard({
   icon: Icon,
   label,
   value,
-  className,
+  dotColor,
+  delay,
 }: {
   icon: typeof CalendarDays;
   label: string;
   value: string;
-  className?: string;
+  dotColor: string;
+  delay: string;
 }) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-lg border bg-card/70 px-3 py-2 shadow-soft",
-        className
+        "group relative flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 px-4 py-3.5",
+        "shadow-soft backdrop-blur-sm transition-all duration-200 hover:shadow-elev hover:-translate-y-0.5",
+        "animate-fade-in"
       )}
+      style={{ animationDelay: delay }}
     >
-      <div className="grid h-9 w-9 place-items-center rounded-md bg-accent text-accent-foreground">
-        <Icon className="h-4 w-4" />
+      <div className="relative grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-accent text-accent-foreground transition-colors group-hover:bg-primary/10">
+        <Icon className="h-4.5 w-4.5" />
+        <span className={cn("absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-card", dotColor)} />
       </div>
-      <div className="leading-tight">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="text-sm font-semibold tracking-tight">{value}</div>
+      <div className="min-w-0 leading-tight">
+        <div className="text-[0.7rem] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className="truncate text-lg font-bold tracking-tight">{value}</div>
       </div>
     </div>
   );
@@ -43,42 +55,59 @@ export function MonthSummary({ referenceDate, events }: Props) {
   const monthLabel = referenceDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
   return (
-    <Card className="relative overflow-hidden border bg-card/70 p-5 shadow-elev">
-      <div className="pointer-events-none absolute inset-0 bg-hero opacity-70" />
+    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-card via-card to-accent/30 p-6 shadow-elev">
+      {/* Background effects */}
+      <div className="pointer-events-none absolute inset-0 bg-hero opacity-50" />
+      <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-brand-2/8 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-brand/8 blur-3xl" />
 
-      <div className="relative flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Sparkles className="h-4 w-4" />
-            Resumo do mês
+      <div className="relative flex flex-col gap-5">
+        <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <Sparkles className="h-3.5 w-3.5 text-brand-2" />
+              Resumo do mês
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+              {monthLabel}
+            </h1>
           </div>
-          <h1 className="text-balance text-2xl font-semibold tracking-tight">Agenda do Rodrigo Lopes — {monthLabel}</h1>
+          {stats.estimatedRevenue > 0 && (
+            <div className="flex items-center gap-1.5 rounded-full bg-status-confirmed/10 px-3 py-1.5 text-xs font-semibold text-status-confirmed">
+              <TrendingUp className="h-3.5 w-3.5" />
+              {stats.confirmedCount} show{stats.confirmedCount !== 1 ? "s" : ""}
+            </div>
+          )}
         </div>
 
-        <div className="grid gap-3 md:grid-cols-4">
-          <StatPill
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
             icon={MapPin}
             label="Shows fechados"
             value={String(stats.confirmedCount)}
-            className="border-status-confirmed/30"
+            dotColor={statusDot.confirmed}
+            delay="0ms"
           />
-          <StatPill
+          <StatCard
             icon={Handshake}
-            label="Dias em negociação"
+            label="Em negociação"
             value={String(stats.negotiationCount)}
-            className="border-status-negotiation/30"
+            dotColor={statusDot.negotiation}
+            delay="60ms"
           />
-          <StatPill
+          <StatCard
             icon={CalendarDays}
             label="Dias livres"
             value={String(stats.freeDays)}
-            className="border-status-free/30"
+            dotColor={statusDot.free}
+            delay="120ms"
           />
-          <StatPill
+          <StatCard
             icon={Wallet}
-            label="Faturamento estimado"
+            label="Faturamento"
             value={formatMoneyBRL(stats.estimatedRevenue)}
-            className="border-brand/30"
+            dotColor={statusDot.revenue}
+            delay="180ms"
           />
         </div>
       </div>
