@@ -2,30 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
 
-function mapEventToLegacy(row: any) {
-  return {
-    ...row,
-    start_time: row.start_at,
-    end_time: row.end_at,
-    status:
-      row.status === "confirmado"
-        ? "confirmed"
-        : row.status === "negociacao"
-          ? "negotiation"
-          : row.status === "bloqueado"
-            ? "blocked"
-            : "hold",
-    contract_status:
-      row.contract_status === "pendente"
-        ? "pending"
-        : row.contract_status === "assinado"
-          ? "signed"
-          : row.contract_status === "cancelado"
-            ? "canceled"
-            : null,
-  };
-}
-
 export function useLeads(orgId: string | null) {
   return useQuery({
     queryKey: ["leads", orgId],
@@ -64,12 +40,12 @@ export function useCalendarEvents(orgId: string | null) {
     enabled: !!orgId,
     queryFn: async () => {
       const { data, error } = await db
-        .from("events")
+        .from("calendar_events")
         .select("*")
         .eq("organization_id", orgId)
-        .order("start_at", { ascending: true });
+        .order("start_time", { ascending: true });
       if (error) throw error;
-      return (data as any[]).map(mapEventToLegacy);
+      return data as any[];
     },
   });
 }
@@ -81,24 +57,16 @@ export function useUpsertCalendarEvent(orgId: string | null) {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error("Unauthorized");
 
-      const nextPayload = {
-        ...payload,
-        start_at: payload.start_time,
-        end_at: payload.end_time,
-        start_time: undefined,
-        end_time: undefined,
-      };
-
       const { data, error } = payload.id
         ? await db
-            .from("events")
-            .update({ ...nextPayload })
+            .from("calendar_events")
+            .update({ ...payload })
             .eq("id", payload.id)
             .select("*")
             .maybeSingle()
         : await db
-            .from("events")
-            .insert({ ...nextPayload, organization_id: orgId, created_by: user.id })
+            .from("calendar_events")
+            .insert({ ...payload, organization_id: orgId, created_by: user.id })
             .select("*")
             .single();
 
@@ -107,6 +75,22 @@ export function useUpsertCalendarEvent(orgId: string | null) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["events", orgId] });
+    },
+  });
+}
+
+export function useContacts(orgId: string | null) {
+  return useQuery({
+    queryKey: ["contacts", orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await db
+        .from("contacts")
+        .select("*")
+        .eq("organization_id", orgId)
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return data as any[];
     },
   });
 }

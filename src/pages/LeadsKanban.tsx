@@ -12,7 +12,6 @@ import { Plus, MapPin, Calendar, DollarSign, Building2, Edit2, TrendingUp, Hands
 import { format, parseISO } from "date-fns";
 import { formatMoneyBRL } from "@/lib/calendar-utils";
 import { LeadDialog } from "@/components/leads/LeadDialog";
-import { mockLeads } from "@/lib/mock-data";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ExportButton } from "@/components/ui/export-button";
 import { DuplicateDetector } from "@/components/data/DuplicateDetector";
@@ -98,12 +97,9 @@ export function LeadsKanbanPage() {
     };
   }, [activeOrgId, queryClient]);
 
-  // Use mock data if no real data exists
-  const displayLeads = leads.length > 0 ? leads : mockLeads;
-  
   // Apply filters
   const filteredLeads = useFilteredData(
-    displayLeads,
+    leads,
     filters,
     ["contractor_name", "city", "venue_name", "contact_email"]
   );
@@ -133,17 +129,9 @@ export function LeadsKanbanPage() {
 
     const leadId = result.draggableId;
     const newStage = result.destination.droppableId as FunnelStage;
-    const lead = displayLeads.find((l: any) => l.id === leadId);
+    const lead = leads.find((l: any) => l.id === leadId);
 
     if (!lead || lead.stage === newStage) return;
-
-    // If using mock data, just show toast
-    if (leads.length === 0) {
-      toast.info("Modo demo", {
-        description: "Crie leads reais para usar o drag-and-drop.",
-      });
-      return;
-    }
 
     // Validation: Lead without date can't advance past "Proposta"
     const advancedStages: FunnelStage[] = ["Negociação", "Contrato", "Fechado"];
@@ -168,12 +156,12 @@ export function LeadsKanbanPage() {
     if (newStage === "Negociação" && lead.event_date) {
       const user = (await supabase.auth.getUser()).data.user;
       if (user) {
-        await db.from("events").insert({
+        await db.from("calendar_events").insert({
           organization_id: activeOrgId,
           lead_id: leadId,
           title: lead.contractor_name,
-          status: "negociacao",
-          start_at: new Date(lead.event_date).toISOString(),
+          status: "negotiation",
+          start_time: new Date(lead.event_date).toISOString(),
           city: lead.city,
           state: lead.state,
           fee: lead.fee,
@@ -190,8 +178,8 @@ export function LeadsKanbanPage() {
     // If moved to "Fechado", update calendar event to confirmed
     if (newStage === "Fechado") {
       await db
-        .from("events")
-        .update({ status: "confirmado" })
+        .from("calendar_events")
+        .update({ status: "confirmed" })
         .eq("lead_id", leadId);
       toast.success("Show confirmado no calendário!");
     }
@@ -281,11 +269,11 @@ export function LeadsKanbanPage() {
           onChange={setFilters}
         />
         
-        {leads.length > 0 && (
+      {leads.length > 0 && (
           <DuplicateDetector
-            leads={displayLeads}
+            leads={leads}
             onView={(id) => {
-              const lead = displayLeads.find((l: any) => l.id === id);
+              const lead = leads.find((l: any) => l.id === id);
               if (lead) openEditDialog(lead);
             }}
           />
