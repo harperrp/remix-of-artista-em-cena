@@ -168,7 +168,7 @@ export function LeadsKanbanPage() {
     if (newStage === "Negociação" && lead.event_date) {
       const user = (await supabase.auth.getUser()).data.user;
       if (user) {
-        await db.from("events").insert({
+        const { error: eventInsertError } = await db.from("events").insert({
           organization_id: activeOrgId,
           lead_id: leadId,
           title: lead.contractor_name,
@@ -178,11 +178,15 @@ export function LeadsKanbanPage() {
           state: lead.state,
           fee: lead.fee,
           created_by: user.id,
-          latitude: lead.latitude,
-          longitude: lead.longitude,
-          venue_name: lead.venue_name,
-          contractor_name: lead.contractor_name,
         });
+
+        if (eventInsertError) {
+          toast.error("Erro ao criar evento no calendário", {
+            description: eventInsertError.message,
+          });
+          return;
+        }
+
         toast.success("Evento criado no calendário");
       }
     }
