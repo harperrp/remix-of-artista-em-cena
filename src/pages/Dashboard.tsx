@@ -16,7 +16,6 @@ import {
   FunnelPieChart,
   LeadsPerMonthChart,
 } from "@/components/dashboard/DashboardCharts";
-import { mockLeads, mockEvents, mockFunnelStats } from "@/lib/mock-data";
 
 export function DashboardPage() {
   const { activeOrgId } = useOrg();
@@ -29,12 +28,8 @@ export function DashboardPage() {
   const monthEnd = endOfMonth(now);
   const monthLabel = format(now, "MMMM yyyy", { locale: ptBR });
 
-  // Use mock data if no real data exists
-  const displayLeads = leads.length > 0 ? leads : mockLeads;
-  const displayEvents = dbEvents.length > 0 ? dbEvents : mockEvents;
-
   // Map DB events to CalendarEvent format for stats
-  const events = displayEvents.map((e: any) => ({
+  const events = dbEvents.map((e: any) => ({
     id: e.id,
     title: e.title,
     status: e.status as "negotiation" | "confirmed" | "blocked" | "hold",
@@ -48,22 +43,22 @@ export function DashboardPage() {
   const stats = monthStats(now, events);
 
   // Calculate additional stats
-  const leadsInNegotiation = displayLeads.filter(
+  const leadsInNegotiation = leads.filter(
     (l: any) => l.stage === "Negociação"
   ).length;
   const totalEstimated =
-    displayLeads.reduce((acc: number, l: any) => acc + (l.fee || 0), 0) +
+    leads.reduce((acc: number, l: any) => acc + (l.fee || 0), 0) +
     stats.estimatedRevenue;
 
   // Shows this month
-  const monthEvents = displayEvents.filter((e: any) => {
+  const monthEvents = dbEvents.filter((e: any) => {
     const d = parseISO(e.start_time);
     return d >= monthStart && d <= monthEnd;
   });
 
   // Map data for preview (leads + events with coordinates)
   const mapMarkers = [
-    ...displayLeads
+    ...leads
       .filter((l: any) => l.latitude && l.longitude)
       .map((l: any) => ({
         id: l.id,
@@ -75,7 +70,7 @@ export function DashboardPage() {
         state: l.state,
         status: l.stage,
       })),
-    ...displayEvents
+    ...dbEvents
       .filter((e: any) => e.latitude && e.longitude)
       .map((e: any) => ({
         id: e.id,
@@ -103,7 +98,7 @@ export function DashboardPage() {
       <DashboardStats
         confirmedShows={stats.confirmedCount}
         negotiationCount={stats.negotiationCount}
-        totalLeads={displayLeads.length}
+        totalLeads={leads.length}
         estimatedRevenue={totalEstimated}
         pendingContracts={contracts.filter((c: any) => c.status === "pending").length}
         freeDays={stats.freeDays}

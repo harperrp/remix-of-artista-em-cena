@@ -140,7 +140,7 @@ export function ArtistCalendarPage() {
     if (!nextStart) return;
 
     try {
-      const { error } = await db.from("events").update({ start_at: nextStart }).eq("id", id);
+      const { error } = await db.from("calendar_events").update({ start_time: nextStart }).eq("id", id);
       if (error) throw error;
       await qc.invalidateQueries({ queryKey: ["events", activeOrgId] });
       if (selected?.id === id) setSelected((s) => (s ? { ...s, start: nextStart } : s));
@@ -163,34 +163,27 @@ export function ArtistCalendarPage() {
       const payload = {
         id: result.event.id,
         organization_id: activeOrgId,
-        status:
-          result.event.status === "confirmed"
-            ? "confirmado"
-            : result.event.status === "negotiation"
-              ? "negociacao"
-              : result.event.status === "blocked"
-                ? "bloqueado"
-                : "aguardando",
+        status: result.event.status,
         title: result.event.title,
-        start_at: result.event.start,
-        end_at: result.event.end ?? null,
+        start_time: result.event.start,
+        end_time: result.event.end ?? null,
         city: result.event.city ?? null,
         state: result.event.state ?? null,
         fee: result.event.fee ?? null,
         stage: result.event.funnelStage ?? null,
         contract_status:
           result.event.contractStatus === "Pendente"
-            ? "pendente"
+            ? "pending"
             : result.event.contractStatus === "Assinado"
-              ? "assinado"
+              ? "signed"
               : result.event.contractStatus === "Cancelado"
-                ? "cancelado"
+                ? "canceled"
                 : null,
         notes: result.event.notes ?? null,
         created_by: user.id,
       };
 
-      const { error } = await db.from("events").upsert(payload, { onConflict: "id" });
+      const { error } = await db.from("calendar_events").upsert(payload, { onConflict: "id" });
       if (error) {
         toast("Não foi possível salvar", { description: error.message });
         return;
@@ -201,7 +194,7 @@ export function ArtistCalendarPage() {
     }
 
     if (result.type === "delete") {
-      const { error } = await db.from("events").delete().eq("id", result.id);
+      const { error } = await db.from("calendar_events").delete().eq("id", result.id);
       if (error) {
         toast("Não foi possível remover", { description: error.message });
         return;
