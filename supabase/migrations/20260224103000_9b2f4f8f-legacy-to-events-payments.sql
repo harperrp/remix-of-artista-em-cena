@@ -57,6 +57,49 @@ CREATE TABLE IF NOT EXISTS public.events (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "events_select_org" ON public.events;
+CREATE POLICY "events_select_org"
+ON public.events FOR SELECT
+TO authenticated
+USING (public.is_member_of_org(auth.uid(), organization_id));
+
+DROP POLICY IF EXISTS "events_write_roles" ON public.events;
+CREATE POLICY "events_write_roles"
+ON public.events FOR INSERT
+TO authenticated
+WITH CHECK (
+  public.is_member_of_org(auth.uid(), organization_id)
+  AND (
+    public.has_org_role(auth.uid(), organization_id, 'comercial')
+    OR public.has_org_role(auth.uid(), organization_id, 'financeiro')
+    OR public.has_org_role(auth.uid(), organization_id, 'admin')
+  )
+  AND created_by = auth.uid()
+);
+
+DROP POLICY IF EXISTS "events_update_roles" ON public.events;
+CREATE POLICY "events_update_roles"
+ON public.events FOR UPDATE
+TO authenticated
+USING (
+  public.is_member_of_org(auth.uid(), organization_id)
+  AND (
+    public.has_org_role(auth.uid(), organization_id, 'comercial')
+    OR public.has_org_role(auth.uid(), organization_id, 'financeiro')
+    OR public.has_org_role(auth.uid(), organization_id, 'admin')
+  )
+)
+WITH CHECK (
+  public.is_member_of_org(auth.uid(), organization_id)
+  AND (
+    public.has_org_role(auth.uid(), organization_id, 'comercial')
+    OR public.has_org_role(auth.uid(), organization_id, 'financeiro')
+    OR public.has_org_role(auth.uid(), organization_id, 'admin')
+  )
+);
+
 ALTER TABLE public.contracts
   DROP CONSTRAINT IF EXISTS contracts_event_id_fkey,
   ADD CONSTRAINT contracts_event_id_fkey
@@ -81,6 +124,55 @@ CREATE TABLE IF NOT EXISTS public.payments (
   created_by uuid NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "payments_select_org" ON public.payments;
+CREATE POLICY "payments_select_org"
+ON public.payments FOR SELECT
+TO authenticated
+USING (public.is_member_of_org(auth.uid(), organization_id));
+
+DROP POLICY IF EXISTS "payments_insert_org" ON public.payments;
+CREATE POLICY "payments_insert_org"
+ON public.payments FOR INSERT
+TO authenticated
+WITH CHECK (
+  public.is_member_of_org(auth.uid(), organization_id)
+  AND (
+    public.has_org_role(auth.uid(), organization_id, 'financeiro')
+    OR public.has_org_role(auth.uid(), organization_id, 'admin')
+  )
+  AND created_by = auth.uid()
+);
+
+DROP POLICY IF EXISTS "payments_update_org" ON public.payments;
+CREATE POLICY "payments_update_org"
+ON public.payments FOR UPDATE
+TO authenticated
+USING (
+  public.is_member_of_org(auth.uid(), organization_id)
+  AND (
+    public.has_org_role(auth.uid(), organization_id, 'financeiro')
+    OR public.has_org_role(auth.uid(), organization_id, 'admin')
+  )
+)
+WITH CHECK (
+  public.is_member_of_org(auth.uid(), organization_id)
+  AND (
+    public.has_org_role(auth.uid(), organization_id, 'financeiro')
+    OR public.has_org_role(auth.uid(), organization_id, 'admin')
+  )
+);
+
+DROP POLICY IF EXISTS "payments_delete_org" ON public.payments;
+CREATE POLICY "payments_delete_org"
+ON public.payments FOR DELETE
+TO authenticated
+USING (
+  public.is_member_of_org(auth.uid(), organization_id)
+  AND public.has_org_role(auth.uid(), organization_id, 'admin')
 );
 
 -- 5) Índices básicos para filtros frequentes
