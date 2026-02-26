@@ -19,6 +19,7 @@ import { TasksPage } from "@/pages/Tasks";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { ArtistDashboardPage } from "@/pages/ArtistDashboard";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
                 <Route path="/app" element={<AppShell />}>
                   <Route index element={<DashboardPage />} />
                   <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="artist" element={<ArtistDashboardPage />} />
                   <Route path="calendar" element={<ArtistCalendarPage />} />
                   <Route path="leads" element={<LeadsKanbanPage />} />
                   <Route path="contracts" element={<ContractsCrudPage />} />

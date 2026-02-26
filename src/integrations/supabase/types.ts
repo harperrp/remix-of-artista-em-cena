@@ -658,6 +658,56 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          is_read: boolean
+          message: string | null
+          organization_id: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          organization_id: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          organization_id?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string
@@ -1296,7 +1346,7 @@ export type Database = {
         | "note_added"
         | "tag_added"
         | "tag_removed"
-      app_role: "admin" | "comercial" | "financeiro"
+      app_role: "admin" | "comercial" | "financeiro" | "artista"
       contract_status: "pending" | "signed" | "canceled"
       event_status: "negotiation" | "confirmed" | "blocked" | "hold"
       funnel_stage:
@@ -1444,7 +1494,7 @@ export const Constants = {
         "tag_added",
         "tag_removed",
       ],
-      app_role: ["admin", "comercial", "financeiro"],
+      app_role: ["admin", "comercial", "financeiro", "artista"],
       contract_status: ["pending", "signed", "canceled"],
       event_status: ["negotiation", "confirmed", "blocked", "hold"],
       funnel_stage: [
