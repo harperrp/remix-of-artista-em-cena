@@ -4,27 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useOrg } from "@/providers/OrgProvider";
+import { useAuth } from "@/providers/AuthProvider";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useOrgMembers } from "@/hooks/useUserRole";
+import { useSendNotification } from "@/hooks/useNotifications";
 import {
-  Plus,
-  Calendar,
-  CheckSquare,
-  ListChecks,
-  Clock,
-  AlertTriangle,
-  Search,
-  Trash2,
-  Edit,
-  RotateCcw,
+  Plus, Calendar, CheckSquare, ListChecks, Clock,
+  AlertTriangle, Search, Trash2, Edit, RotateCcw, Send, User,
 } from "lucide-react";
 import { format, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -37,7 +33,10 @@ const priorityConfig: Record<string, { label: string; class: string; sort: numbe
 
 export function TasksPage() {
   const { activeOrgId } = useOrg();
+  const { user } = useAuth();
   const qc = useQueryClient();
+  const { data: members = [] } = useOrgMembers();
+  const sendNotification = useSendNotification();
   const [tab, setTab] = useState("pending");
   const [search, setSearch] = useState("");
   const [filterPriority, setFilterPriority] = useState("all");
@@ -49,6 +48,7 @@ export function TasksPage() {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
   const [dueDate, setDueDate] = useState("");
+  const [assignedTo, setAssignedTo] = useState("");
 
   const isCompleted = tab === "completed";
 
@@ -69,6 +69,9 @@ export function TasksPage() {
       return data as any[];
     },
   });
+
+  // Build member lookup
+  const memberMap = new Map(members.map((m: any) => [m.userId, m]));
 
   const filtered = tasks
     .filter((t: any) => {
@@ -97,6 +100,7 @@ export function TasksPage() {
     setDescription("");
     setPriority("medium");
     setDueDate("");
+    setAssignedTo("");
     setDialogOpen(true);
   }
 
@@ -106,34 +110,55 @@ export function TasksPage() {
     setDescription(task.description || "");
     setPriority(task.priority || "medium");
     setDueDate(task.due_date ? task.due_date.split("T")[0] : "");
+    setAssignedTo(task.assigned_to || "");
     setDialogOpen(true);
   }
 
   async function saveTask() {
     if (!title.trim() || !activeOrgId) return;
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) return;
+    const currentUser = (await supabase.auth.getUser()).data.user;
+    if (!currentUser) return;
 
     const payload: any = {
       title: title.trim(),
       description: description.trim() || null,
       priority,
       due_date: dueDate || null,
+      assigned_to: assignedTo || null,
     };
+
+    let taskId: string | null = null;
 
     if (editingTask) {
       const { error } = await db.from("tasks").update(payload).eq("id", editingTask.id);
       if (error) { toast.error("Erro ao atualizar"); return; }
+      taskId = editingTask.id;
       toast.success("Tarefa atualizada");
     } else {
-      const { error } = await db.from("tasks").insert({
+      const { data: created, error } = await db.from("tasks").insert({
         ...payload,
         organization_id: activeOrgId,
-        created_by: user.id,
-      });
+        created_by: currentUser.id,
+      }).select("id").single();
       if (error) { toast.error("Erro ao criar tarefa"); return; }
+      taskId = created?.id;
       toast.success("Tarefa criada");
     }
+
+    // Send notification if assigned to someone else
+    if (assignedTo && assignedTo !== currentUser.id && taskId) {
+      const assignee = memberMap.get(assignedTo);
+      const senderName = members.find((m: any) => m.userId === currentUser.id)?.displayName || "Alguém";
+      sendNotification.mutate({
+        userId: assignedTo,
+        type: "task_assigned",
+        title: "Nova tarefa atribuída",
+        message: `${senderName} atribuiu a tarefa "${title.trim()}" para você`,
+        entityType: "task",
+        entityId: taskId,
+      });
+    }
+
     setDialogOpen(false);
     qc.invalidateQueries({ queryKey: ["tasks-full", activeOrgId] });
     qc.invalidateQueries({ queryKey: ["tasks", activeOrgId] });
@@ -156,6 +181,12 @@ export function TasksPage() {
     toast.success("Tarefa removida");
   }
 
+  function getAssigneeName(userId: string | null) {
+    if (!userId) return null;
+    const m = memberMap.get(userId);
+    return m?.displayName || m?.email || null;
+  }
+
   return (
     <div className="space-y-6 fade-up">
       {/* Header */}
@@ -166,7 +197,7 @@ export function TasksPage() {
             Tarefas
           </h1>
           <p className="text-sm text-muted-foreground">
-            Gerencie todas as suas tarefas e pendências
+            Gerencie e atribua tarefas para a equipe
           </p>
         </div>
         <Button onClick={openNew} className="gap-2">
@@ -261,6 +292,7 @@ export function TasksPage() {
               task.due_date &&
               isPast(new Date(task.due_date)) &&
               !isToday(new Date(task.due_date));
+            const assigneeName = getAssigneeName(task.assigned_to);
 
             return (
               <div
@@ -297,6 +329,12 @@ export function TasksPage() {
                     >
                       {priorityConfig[task.priority]?.label || task.priority}
                     </Badge>
+                    {assigneeName && (
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 gap-1">
+                        <User className="h-2.5 w-2.5" />
+                        {assigneeName}
+                      </Badge>
+                    )}
                     {task.is_completed && task.completed_at && (
                       <span className="text-xs text-muted-foreground">
                         Concluída em {format(new Date(task.completed_at), "dd/MM/yyyy", { locale: ptBR })}
@@ -356,6 +394,28 @@ export function TasksPage() {
                 <Label>Vencimento</Label>
                 <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
               </div>
+            </div>
+            <div>
+              <Label className="flex items-center gap-1.5">
+                <Send className="h-3.5 w-3.5" />
+                Atribuir para
+              </Label>
+              <Select value={assignedTo} onValueChange={setAssignedTo}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um membro..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Ninguém</SelectItem>
+                  {members.map((m: any) => (
+                    <SelectItem key={m.userId} value={m.userId}>
+                      <span className="flex items-center gap-2">
+                        {m.displayName || m.email}
+                        <span className="text-xs text-muted-foreground">({m.roleLabel})</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

@@ -1,5 +1,6 @@
 import { useOrg } from "@/providers/OrgProvider";
 import { useLeads, useContracts, useCalendarEvents } from "@/hooks/useCrmQueries";
+import { useUserRole } from "@/hooks/useUserRole";
 import { monthStats } from "@/lib/calendar-utils";
 import { format, startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -20,6 +21,7 @@ import {
 
 export function DashboardPage() {
   const { activeOrgId } = useOrg();
+  const { canViewFinancialTotals } = useUserRole();
   const { data: leads = [] } = useLeads(activeOrgId);
   const { data: contracts = [] } = useContracts(activeOrgId);
   const { data: dbEvents = [] } = useCalendarEvents(activeOrgId);
@@ -139,7 +141,7 @@ export function DashboardPage() {
       <div className="grid gap-4 lg:grid-cols-3">
         <PendingTasks />
         <RecentActivities />
-        <FinanceQuickCard />
+        {canViewFinancialTotals && <FinanceQuickCard />}
       </div>
     </div>
   );
