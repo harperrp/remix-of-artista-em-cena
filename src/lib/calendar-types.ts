@@ -1,12 +1,6 @@
 export type CalendarStatus = "free" | "negotiation" | "confirmed" | "blocked" | "hold";
 
-export type FunnelStage =
-  | "Prospecção"
-  | "Contato"
-  | "Proposta"
-  | "Negociação"
-  | "Contrato"
-  | "Fechado";
+export type FunnelStage = string;
 
 export type ContractStatus = "Pendente" | "Assinado" | "Cancelado";
 

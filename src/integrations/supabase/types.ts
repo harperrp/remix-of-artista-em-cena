@@ -77,7 +77,7 @@ export type Database = {
           longitude: number | null
           notes: string | null
           organization_id: string
-          stage: Database["public"]["Enums"]["funnel_stage"] | null
+          stage: string | null
           start_time: string
           state: string | null
           status: Database["public"]["Enums"]["event_status"]
@@ -103,7 +103,7 @@ export type Database = {
           longitude?: number | null
           notes?: string | null
           organization_id: string
-          stage?: Database["public"]["Enums"]["funnel_stage"] | null
+          stage?: string | null
           start_time: string
           state?: string | null
           status?: Database["public"]["Enums"]["event_status"]
@@ -129,7 +129,7 @@ export type Database = {
           longitude?: number | null
           notes?: string | null
           organization_id?: string
-          stage?: Database["public"]["Enums"]["funnel_stage"] | null
+          stage?: string | null
           start_time?: string
           state?: string | null
           status?: Database["public"]["Enums"]["event_status"]
@@ -419,6 +419,44 @@ export type Database = {
           },
         ]
       }
+      funnel_stages: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funnel_stages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_messages: {
         Row: {
           created_at: string
@@ -493,7 +531,7 @@ export type Database = {
           notes: string | null
           organization_id: string
           origin: string | null
-          stage: Database["public"]["Enums"]["funnel_stage"]
+          stage: string
           state: string | null
           street: string | null
           street_number: string | null
@@ -521,7 +559,7 @@ export type Database = {
           notes?: string | null
           organization_id: string
           origin?: string | null
-          stage?: Database["public"]["Enums"]["funnel_stage"]
+          stage?: string
           state?: string | null
           street?: string | null
           street_number?: string | null
@@ -549,7 +587,7 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           origin?: string | null
-          stage?: Database["public"]["Enums"]["funnel_stage"]
+          stage?: string
           state?: string | null
           street?: string | null
           street_number?: string | null
@@ -1403,13 +1441,6 @@ export type Database = {
       app_role: "admin" | "comercial" | "financeiro" | "artista"
       contract_status: "pending" | "signed" | "canceled"
       event_status: "negotiation" | "confirmed" | "blocked" | "hold"
-      funnel_stage:
-        | "Prospecção"
-        | "Contato"
-        | "Proposta"
-        | "Negociação"
-        | "Contrato"
-        | "Fechado"
       taggable_type: "lead" | "contact" | "venue" | "event"
     }
     CompositeTypes: {
@@ -1551,14 +1582,6 @@ export const Constants = {
       app_role: ["admin", "comercial", "financeiro", "artista"],
       contract_status: ["pending", "signed", "canceled"],
       event_status: ["negotiation", "confirmed", "blocked", "hold"],
-      funnel_stage: [
-        "Prospecção",
-        "Contato",
-        "Proposta",
-        "Negociação",
-        "Contrato",
-        "Fechado",
-      ],
       taggable_type: ["lead", "contact", "venue", "event"],
     },
   },
