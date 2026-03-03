@@ -24,9 +24,8 @@ import { CityAutocomplete } from "@/components/ui/city-autocomplete";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Navigation, Map } from "lucide-react";
 import { MapPickerDialog } from "./MapPickerDialog";
-import type { FunnelStage } from "@/lib/calendar-types";
-
-const STAGES: FunnelStage[] = ["Prospecção", "Contato", "Proposta", "Negociação", "Contrato", "Fechado"];
+import { useOrg } from "@/providers/OrgProvider";
+import { useFunnelStages } from "@/hooks/useFunnelStages";
 const CONTRACTOR_TYPES = ["Prefeitura", "Casa de Show", "Evento Privado", "Festival", "Outro"];
 const ORIGIN_OPTIONS = ["WhatsApp", "Kommo", "Instagram", "Site", "Indicação", "Telefone", "Outro"];
 const STATES = [
@@ -67,6 +66,9 @@ export function LeadDialog({ open, onOpenChange, initialData, onResult }: Props)
   const isEdit = !!initialData;
   const [cityInput, setCityInput] = useState("");
   const [mapPickerOpen, setMapPickerOpen] = useState(false);
+  const { activeOrgId } = useOrg();
+  const { data: dynamicStages = [] } = useFunnelStages(activeOrgId);
+  const stageNames = dynamicStages.map((s) => s.name);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -257,7 +259,7 @@ export function LeadDialog({ open, onOpenChange, initialData, onResult }: Props)
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {STAGES.map((s) => (
+                  {stageNames.map((s) => (
                     <SelectItem key={s} value={s}>{s}</SelectItem>
                   ))}
                 </SelectContent>
