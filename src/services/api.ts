@@ -120,7 +120,7 @@ export async function fetchEvents(orgId: string): Promise<CalendarEvent[]> {
 }
 
 export async function createEvent(event: Partial<CalendarEvent> & { organization_id: string; title: string; start_time: string; created_by: string }) {
-  const { data, error } = await supabase.from("calendar_events").insert(event).select().single();
+  const { data, error } = await supabase.from("calendar_events").insert(event as any).select().single();
   if (error) throw error;
   return data as CalendarEvent;
 }
