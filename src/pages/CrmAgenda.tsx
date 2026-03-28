@@ -337,8 +337,8 @@ export function CrmAgendaPage() {
                             </span>
                           )}
                         </div>
-                        {ev.contractor_name && (
-                          <p className="text-xs text-muted-foreground">🎤 {ev.contractor_name}</p>
+                        {(ev as any).contractor_name && (
+                          <p className="text-xs text-muted-foreground">🎤 {(ev as any).contractor_name}</p>
                         )}
                         {ev.fee != null && (
                           <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
