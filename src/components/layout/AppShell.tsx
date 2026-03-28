@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -26,23 +26,32 @@ import {
   MessageSquare,
   Kanban,
   Smartphone,
+  ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
 import { QuickAddMenu } from "./QuickAddMenu";
 import { NotificationBell } from "./NotificationBell";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { GlobalSearch } from "@/components/ui/global-search";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function TopNavItem({
   to,
   icon: Icon,
   label,
   onClick,
+  className,
 }: {
   to: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   onClick?: () => void;
+  className?: string;
 }) {
   return (
     <NavLink
@@ -50,20 +59,23 @@ function TopNavItem({
       onClick={onClick}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-all duration-150",
+          "flex min-w-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-medium transition-all duration-150",
           isActive
             ? "bg-primary/10 text-primary shadow-sm"
-            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground",
+          className
         )
       }
     >
-      <Icon className="h-3.5 w-3.5" />
-      <span>{label}</span>
+      <Icon className="h-3.5 w-3.5 shrink-0" />
+      <span className="truncate">{label}</span>
     </NavLink>
   );
 }
 
 export function AppShell() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { profile } = useOrg();
   const { role, roleLabel, canViewFinancialTotals, canManageLeads, isArtista } = useUserRole();
@@ -93,11 +105,18 @@ export function AppShell() {
     navItems.push({ to: "/app/admin", icon: Crown, label: "Super Admin", roles: ["admin"] });
   }
 
+  const MAX_VISIBLE_NAV_ITEMS = 7;
+  const visibleNavItems = navItems.slice(0, MAX_VISIBLE_NAV_ITEMS);
+  const overflowNavItems = navItems.slice(MAX_VISIBLE_NAV_ITEMS);
+  const isOverflowItemActive = overflowNavItems.some(
+    (item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60">
-        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-5 h-14 md:px-8">
+        <div className="mx-auto flex h-14 w-full max-w-[1440px] items-center justify-between gap-3 px-5 md:px-8">
           {/* Logo */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold text-xs tracking-tight">
@@ -114,10 +133,45 @@ export function AppShell() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-0.5 overflow-x-auto">
-            {navItems.map((item) => (
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 overflow-hidden lg:flex">
+            {visibleNavItems.map((item) => (
               <TopNavItem key={item.to} {...item} />
             ))}
+
+            {overflowNavItems.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-medium transition-all duration-150",
+                      isOverflowItemActive
+                        ? "bg-primary/10 text-primary shadow-sm"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )}
+                  >
+                    <span>Mais</span>
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {overflowNavItems.map((item) => {
+                    const isActive =
+                      location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+                    return (
+                      <DropdownMenuItem
+                        key={item.to}
+                        className={cn("cursor-pointer gap-2", isActive && "bg-accent text-accent-foreground")}
+                        onClick={() => navigate(item.to)}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </nav>
 
           {/* Actions */}
