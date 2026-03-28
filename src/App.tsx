@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { OrgProvider } from "@/providers/OrgProvider";
 import { AppShell } from "@/components/layout/AppShell";
+import { CrmLayout } from "@/components/crm/CrmLayout";
 import { LandingPage } from "@/pages/LandingPage";
 import { DashboardPage } from "@/pages/Dashboard";
 import { LeadsKanbanPage } from "@/pages/LeadsKanban";
@@ -23,6 +24,14 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { ArtistDashboardPage } from "@/pages/ArtistDashboard";
 import { SuperAdminPage } from "@/pages/SuperAdmin";
 
+// CRM pages
+import { CrmDashboardPage } from "@/pages/CrmDashboard";
+import { CrmLeadsPage } from "@/pages/CrmLeads";
+import { CrmInboxPage } from "@/pages/CrmInbox";
+import { CrmPipelinePage } from "@/pages/CrmPipeline";
+import { CrmAgendaPage } from "@/pages/CrmAgenda";
+import { CrmWhatsAppPage } from "@/pages/CrmWhatsApp";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -38,7 +47,19 @@ const App = () => (
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
 
-              {/* Protected App Routes */}
+              {/* CRM Routes (new clean architecture) */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/crm" element={<CrmLayout />}>
+                  <Route index element={<CrmDashboardPage />} />
+                  <Route path="inbox" element={<CrmInboxPage />} />
+                  <Route path="leads" element={<CrmLeadsPage />} />
+                  <Route path="pipeline" element={<CrmPipelinePage />} />
+                  <Route path="agenda" element={<CrmAgendaPage />} />
+                  <Route path="whatsapp" element={<CrmWhatsAppPage />} />
+                </Route>
+              </Route>
+
+              {/* Legacy App Routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/app" element={<AppShell />}>
                   <Route index element={<DashboardPage />} />
