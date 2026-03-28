@@ -23,6 +23,7 @@ import {
   X,
   Music,
   Crown,
+  MessageSquare,
 } from "lucide-react";
 import { useState } from "react";
 import { QuickAddMenu } from "./QuickAddMenu";
@@ -68,6 +69,7 @@ export function AppShell() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const allNavItems = [
+    { to: "/crm/inbox", icon: MessageSquare, label: "Inbox", roles: ["admin", "comercial", "financeiro", "artista"] },
     { to: "/app/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["admin", "comercial", "financeiro", "artista"] },
     { to: "/app/artist", icon: Music, label: "Painel Artista", roles: ["artista", "admin"] },
     { to: "/app/calendar", icon: CalendarDays, label: "Agenda", roles: ["admin", "comercial", "financeiro", "artista"] },
