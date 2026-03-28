@@ -77,6 +77,28 @@ export async function updateConversation(id: string, updates: Partial<Conversati
   if (error) throw error;
 }
 
+export async function markConversationRead(id: string) {
+  const { error } = await supabase.from("conversations").update({ unread_count: 0 }).eq("id", id);
+  if (error) throw error;
+}
+
+// ── Notes ──
+export async function fetchNotes(entityId: string) {
+  const { data, error } = await supabase
+    .from("notes")
+    .select("*")
+    .eq("entity_id", entityId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function createNote(note: { organization_id: string; entity_id: string; entity_type: string; content: string; created_by: string }) {
+  const { data, error } = await supabase.from("notes").insert(note).select().single();
+  if (error) throw error;
+  return data;
+}
+
 // ── Messages ──
 export async function fetchMessages(conversationId: string): Promise<Message[]> {
   const { data, error } = await supabase
