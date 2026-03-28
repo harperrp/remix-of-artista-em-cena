@@ -311,6 +311,63 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          contact_name: string | null
+          contact_phone: string
+          created_at: string | null
+          id: string
+          last_message_at: string | null
+          last_message_text: string | null
+          lead_id: string | null
+          organization_id: string
+          status: string | null
+          unread_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          contact_name?: string | null
+          contact_phone: string
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_text?: string | null
+          lead_id?: string | null
+          organization_id: string
+          status?: string | null
+          unread_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          contact_name?: string | null
+          contact_phone?: string
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_text?: string | null
+          lead_id?: string | null
+          organization_id?: string
+          status?: string | null
+          unread_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entity_tags: {
         Row: {
           created_at: string
@@ -459,6 +516,7 @@ export type Database = {
       }
       lead_messages: {
         Row: {
+          conversation_id: string | null
           created_at: string
           direction: string
           id: string
@@ -471,6 +529,7 @@ export type Database = {
           wa_id: string | null
         }
         Insert: {
+          conversation_id?: string | null
           created_at?: string
           direction?: string
           id?: string
@@ -483,6 +542,7 @@ export type Database = {
           wa_id?: string | null
         }
         Update: {
+          conversation_id?: string | null
           created_at?: string
           direction?: string
           id?: string
@@ -495,6 +555,13 @@ export type Database = {
           wa_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lead_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lead_messages_lead_id_fkey"
             columns: ["lead_id"]
