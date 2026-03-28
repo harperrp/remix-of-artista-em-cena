@@ -50,7 +50,7 @@ export function ConversationList({ conversations, selectedId, onSelect }: Props)
             </p>
           </div>
         ) : (
-          <div className="p-1">
+          <div className="p-1 space-y-0.5">
             {filtered.map((c) => {
               const unread = (c.unread_count ?? 0) > 0;
               return (
@@ -58,35 +58,43 @@ export function ConversationList({ conversations, selectedId, onSelect }: Props)
                   key={c.id}
                   onClick={() => onSelect(c.id)}
                   className={cn(
-                    "w-full text-left rounded-lg px-3 py-2.5 transition-colors",
+                    "w-full text-left rounded-lg px-3 py-3 transition-colors",
                     selectedId === c.id
                       ? "bg-accent"
-                      : "hover:bg-accent/40"
+                      : unread
+                        ? "bg-primary/5 hover:bg-accent/40"
+                        : "hover:bg-accent/40"
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className={cn(
-                      "text-sm truncate",
-                      unread ? "font-semibold text-foreground" : "font-medium text-foreground"
-                    )}>
+                    <p
+                      className={cn(
+                        "text-sm truncate",
+                        unread ? "font-bold text-foreground" : "font-medium text-foreground"
+                      )}
+                    >
                       {c.contact_name || c.contact_phone}
                     </p>
-                    {unread && (
-                      <Badge className="text-[10px] h-5 min-w-5 justify-center shrink-0 bg-primary text-primary-foreground">
-                        {c.unread_count}
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <p className="text-[10px] text-muted-foreground">
+                        {c.last_message_at
+                          ? format(parseISO(c.last_message_at), "HH:mm", { locale: ptBR })
+                          : ""}
+                      </p>
+                      {unread && (
+                        <Badge className="text-[10px] h-5 min-w-5 justify-center bg-primary text-primary-foreground">
+                          {c.unread_count}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <p className={cn(
-                    "text-xs truncate mt-0.5",
-                    unread ? "text-foreground font-medium" : "text-muted-foreground"
-                  )}>
+                  <p
+                    className={cn(
+                      "text-xs truncate mt-1",
+                      unread ? "text-foreground font-medium" : "text-muted-foreground"
+                    )}
+                  >
                     {c.last_message_text || "Sem mensagens"}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                    {c.last_message_at
-                      ? format(parseISO(c.last_message_at), "dd/MM HH:mm", { locale: ptBR })
-                      : ""}
                   </p>
                 </button>
               );
