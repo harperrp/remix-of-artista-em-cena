@@ -7,31 +7,35 @@ interface StatCardProps {
   label: string;
   value: string | number;
   subtext?: string;
-  accent?: string;
+  iconColor?: string;
   trend?: { value: number; positive: boolean };
 }
 
-export function StatCard({ icon: Icon, label, value, subtext, accent, trend }: StatCardProps) {
+export function StatCard({ icon: Icon, label, value, subtext, iconColor, trend }: StatCardProps) {
   return (
-    <Card className={`p-5 border bg-card/80 shadow-soft transition-all hover:shadow-elev ${accent || ""}`}>
+    <Card className="relative overflow-hidden p-5 border bg-card shadow-card hover:shadow-soft transition-shadow duration-200">
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <Icon className="h-6 w-6 text-primary" />
+        <div className="space-y-2">
+          <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${iconColor || "bg-primary/8 text-primary"}`}>
+            <Icon className="h-4.5 w-4.5" />
           </div>
           <div>
-            <div className="text-3xl font-bold tracking-tight">{value}</div>
-            <div className="text-sm text-muted-foreground">{label}</div>
-            {subtext && <div className="text-xs text-muted-foreground mt-0.5">{subtext}</div>}
+            <p className="text-2xl font-bold tracking-tight">{value}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
           </div>
         </div>
         {trend && (
-          <div className={`flex items-center gap-1 text-xs font-medium ${trend.positive ? "text-status-confirmed" : "text-destructive"}`}>
+          <div className={`flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md ${
+            trend.positive
+              ? "bg-status-confirmed/10 text-status-confirmed"
+              : "bg-destructive/10 text-destructive"
+          }`}>
             <TrendingUp className={`h-3 w-3 ${!trend.positive && "rotate-180"}`} />
             {trend.value}%
           </div>
         )}
       </div>
+      {subtext && <p className="text-[11px] text-muted-foreground mt-1">{subtext}</p>}
     </Card>
   );
 }
@@ -60,7 +64,7 @@ export function DashboardStats({
         label="Shows Agendados"
         value={confirmedShows}
         subtext="este mês"
-        accent="border-l-4 border-l-status-confirmed"
+        iconColor="bg-status-confirmed/10 text-status-confirmed"
         trend={{ value: 12, positive: true }}
       />
       <StatCard
@@ -68,14 +72,14 @@ export function DashboardStats({
         label="Em Negociação"
         value={negotiationCount}
         subtext="aguardando resposta"
-        accent="border-l-4 border-l-status-negotiation"
+        iconColor="bg-status-negotiation/10 text-status-negotiation"
       />
       <StatCard
         icon={Users}
         label="Total de Leads"
         value={totalLeads}
         subtext="no funil"
-        accent="border-l-4 border-l-brand-2"
+        iconColor="bg-brand-2/10 text-brand-2"
         trend={{ value: 8, positive: true }}
       />
       <StatCard
@@ -83,7 +87,7 @@ export function DashboardStats({
         label="Receita Projetada"
         value={formatMoneyBRL(estimatedRevenue)}
         subtext="confirmado + negociação"
-        accent="border-l-4 border-l-primary"
+        iconColor="bg-primary/8 text-primary"
         trend={{ value: 15, positive: true }}
       />
     </div>

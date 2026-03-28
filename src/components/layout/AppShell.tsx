@@ -50,14 +50,14 @@ function TopNavItem({
       onClick={onClick}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+          "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-all duration-150",
           isActive
-            ? "bg-primary text-primary-foreground shadow-sm"
+            ? "bg-primary/10 text-primary shadow-sm"
             : "text-muted-foreground hover:bg-accent hover:text-foreground"
         )
       }
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-3.5 w-3.5" />
       <span>{label}</span>
     </NavLink>
   );
@@ -89,7 +89,6 @@ export function AppShell() {
 
   const navItems = allNavItems.filter((item) => item.roles.includes(role));
 
-  // Add super admin link if user is super admin
   if (isSuperAdmin) {
     navItems.push({ to: "/app/admin", icon: Crown, label: "Super Admin", roles: ["admin"] });
   }
@@ -97,35 +96,32 @@ export function AppShell() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6">
+      <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60">
+        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-5 h-14 md:px-8">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold text-xs tracking-tight">
               RL
             </div>
             <div className="hidden sm:block">
               <div className="text-sm font-semibold tracking-tight flex items-center gap-2">
-                CRM Rodrigo Lopes
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                Rodrigo Lopes
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-medium">
                   {roleLabel}
                 </Badge>
-              </div>
-              <div className="truncate text-xs text-muted-foreground">
-                {profile?.display_name ?? profile?.email ?? user?.email ?? ""}
               </div>
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-0.5 overflow-x-auto">
             {navItems.map((item) => (
               <TopNavItem key={item.to} {...item} />
             ))}
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             <GlobalSearch />
             {canManageLeads && <QuickAddMenu />}
             <NotificationBell />
@@ -133,7 +129,7 @@ export function AppShell() {
             <Button
               variant="ghost"
               size="icon"
-              className="hidden sm:flex"
+              className="hidden sm:flex h-8 w-8 text-muted-foreground hover:text-foreground"
               onClick={() => supabase.auth.signOut()}
             >
               <LogOut className="h-4 w-4" />
@@ -143,7 +139,7 @@ export function AppShell() {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden h-8 w-8"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (
@@ -157,8 +153,8 @@ export function AppShell() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t bg-background p-4 animate-fade-in">
-            <nav className="grid gap-2">
+          <div className="lg:hidden border-t bg-card p-4 animate-fade-in">
+            <nav className="grid gap-1">
               {navItems.map((item) => (
                 <TopNavItem
                   key={item.to}
@@ -169,7 +165,7 @@ export function AppShell() {
               <Button
                 variant="secondary"
                 size="sm"
-                className="gap-2 mt-2 justify-start"
+                className="gap-2 mt-3 justify-start"
                 onClick={() => supabase.auth.signOut()}
               >
                 <LogOut className="h-4 w-4" />
@@ -181,7 +177,7 @@ export function AppShell() {
       </header>
 
       {/* Main */}
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8">
+      <main className="mx-auto w-full max-w-[1440px] px-5 py-6 md:px-8 md:py-8">
         <Outlet />
       </main>
     </div>

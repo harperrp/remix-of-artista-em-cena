@@ -62,12 +62,12 @@ export function LeadPanel({ conversation, stages }: Props) {
   };
 
   return (
-    <div className="w-72 border-l border-border shrink-0 overflow-auto bg-card">
-      <div className="p-4 space-y-4">
+    <div className="w-80 border-l border-border shrink-0 overflow-auto bg-card">
+      <div className="p-5 space-y-5">
         {/* Contact info */}
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center shrink-0">
-            <User className="h-5 w-5 text-muted-foreground" />
+          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <User className="h-4.5 w-4.5 text-primary" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">
@@ -79,17 +79,17 @@ export function LeadPanel({ conversation, stages }: Props) {
 
         {/* Lead card */}
         {lead && (
-          <Card className="border bg-background p-3 space-y-2">
-            <p className="text-[10px] font-semibold text-muted-foreground tracking-wider">LEAD</p>
-            <p className="text-sm font-medium text-foreground">{lead.contractor_name}</p>
-            <Badge variant="outline" className="text-[10px]">{lead.stage}</Badge>
+          <Card className="border bg-accent/30 p-4 space-y-2.5">
+            <p className="text-[10px] font-semibold text-muted-foreground tracking-widest uppercase">Lead</p>
+            <p className="text-sm font-semibold text-foreground">{lead.contractor_name}</p>
+            <Badge variant="secondary" className="text-[10px] font-medium">{lead.stage}</Badge>
             {lead.contact_phone && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Phone className="h-3 w-3" /> {lead.contact_phone}
               </p>
             )}
             {(lead.city || lead.state) && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <MapPin className="h-3 w-3" /> {[lead.city, lead.state].filter(Boolean).join(", ")}
               </p>
             )}
@@ -99,17 +99,17 @@ export function LeadPanel({ conversation, stages }: Props) {
         {/* Stage buttons */}
         {lead && stages.length > 0 && (
           <div>
-            <p className="text-[10px] font-semibold text-muted-foreground tracking-wider mb-2">MOVER ETAPA</p>
-            <div className="flex flex-wrap gap-1">
+            <p className="text-[10px] font-semibold text-muted-foreground tracking-widest uppercase mb-2.5">Mover Etapa</p>
+            <div className="flex flex-wrap gap-1.5">
               {stages.map((s) => (
                 <button
                   key={s.id}
                   onClick={() => handleStageChange(s.name)}
                   className={cn(
-                    "text-[10px] px-2 py-1 rounded-full border transition-colors",
+                    "text-[11px] px-2.5 py-1 rounded-lg border transition-all duration-150 font-medium",
                     lead.stage === s.name
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "text-muted-foreground hover:bg-accent border-border"
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground border-border"
                   )}
                 >
                   {s.name}
@@ -122,7 +122,7 @@ export function LeadPanel({ conversation, stages }: Props) {
         {/* Quick notes */}
         {leadId && (
           <div>
-            <p className="text-[10px] font-semibold text-muted-foreground tracking-wider mb-2">NOTAS</p>
+            <p className="text-[10px] font-semibold text-muted-foreground tracking-widest uppercase mb-2.5">Notas</p>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -134,16 +134,16 @@ export function LeadPanel({ conversation, stages }: Props) {
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder="Adicionar nota..."
-                className="min-h-[60px] text-xs resize-none"
+                className="min-h-[56px] text-xs resize-none bg-secondary/50 border-transparent focus:border-border"
               />
-              <Button type="submit" size="sm" className="w-full text-xs" disabled={!noteText.trim() || noteMut.isPending}>
-                <Send className="h-3 w-3 mr-1" /> Salvar nota
+              <Button type="submit" size="sm" variant="secondary" className="w-full text-xs gap-1.5" disabled={!noteText.trim() || noteMut.isPending}>
+                <Send className="h-3 w-3" /> Salvar nota
               </Button>
             </form>
             {notes.length > 0 && (
-              <div className="mt-3 space-y-2 max-h-48 overflow-auto">
+              <div className="mt-3 space-y-1.5 max-h-48 overflow-auto">
                 {notes.slice(0, 5).map((n: any) => (
-                  <div key={n.id} className="text-xs bg-muted rounded-lg p-2 text-foreground">
+                  <div key={n.id} className="text-xs bg-accent/50 rounded-lg p-2.5 text-foreground leading-relaxed">
                     {n.content}
                   </div>
                 ))}

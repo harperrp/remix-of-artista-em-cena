@@ -31,7 +31,6 @@ export function DashboardPage() {
   const monthEnd = endOfMonth(now);
   const monthLabel = format(now, "MMMM yyyy", { locale: ptBR });
 
-  // Map DB events to CalendarEvent format for stats
   const events = dbEvents.map((e: any) => ({
     id: e.id,
     title: e.title,
@@ -45,7 +44,6 @@ export function DashboardPage() {
 
   const stats = monthStats(now, events);
 
-  // Calculate additional stats
   const leadsInNegotiation = leads.filter(
     (l: any) => l.stage === "Negociação"
   ).length;
@@ -53,13 +51,11 @@ export function DashboardPage() {
     leads.reduce((acc: number, l: any) => acc + (l.fee || 0), 0) +
     stats.estimatedRevenue;
 
-  // Shows this month
   const monthEvents = dbEvents.filter((e: any) => {
     const d = parseISO(e.start_time);
     return d >= monthStart && d <= monthEnd;
   });
 
-  // Map data for preview (leads + events with coordinates)
   const mapMarkers = [
     ...leads
       .filter((l: any) => l.latitude && l.longitude)
@@ -91,8 +87,8 @@ export function DashboardPage() {
     <div className="space-y-6 fade-up">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground capitalize">
+        <h1 className="text-xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-sm text-muted-foreground capitalize mt-0.5">
           Visão geral de {monthLabel}
         </p>
       </div>
@@ -108,26 +104,26 @@ export function DashboardPage() {
       />
 
       {/* Charts row */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         <ShowsPerMonthChart />
         <FunnelPieChart />
       </div>
 
       {/* Second charts row */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         <RevenueChart />
         <LeadsPerMonthChart />
       </div>
 
       {/* Map + Upcoming shows */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2 border bg-card/70 overflow-hidden">
-          <div className="p-4 border-b">
-            <h2 className="font-semibold flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
+      <div className="grid gap-5 lg:grid-cols-3">
+        <Card className="lg:col-span-2 border bg-card shadow-card overflow-hidden">
+          <div className="px-5 py-4 border-b">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
               Mapa de Oportunidades
             </h2>
-            <p className="text-xs text-muted-foreground">Leads e shows no mapa</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Leads e shows no mapa</p>
           </div>
           <div className="h-[300px]">
             <MapPreview markers={mapMarkers} />
@@ -138,7 +134,7 @@ export function DashboardPage() {
       </div>
 
       {/* Tasks + Activities + Finance */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-3">
         <PendingTasks />
         <RecentActivities />
         {canViewFinancialTotals && <FinanceQuickCard />}
