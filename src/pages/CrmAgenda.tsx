@@ -70,6 +70,7 @@ export function CrmAgendaPage() {
 
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [createDate, setCreateDate] = useState<Date | null>(null);
 
@@ -115,6 +116,12 @@ export function CrmAgendaPage() {
       const key = format(parseISO(ev.start_time), "yyyy-MM-dd");
       (map[key] ??= []).push(ev);
     });
+    Object.keys(map).forEach((key) => {
+      map[key].sort(
+        (a, b) =>
+          parseISO(a.start_time).getTime() - parseISO(b.start_time).getTime(),
+      );
+    });
     return map;
   }, [events]);
 
@@ -128,6 +135,12 @@ export function CrmAgendaPage() {
 
   function handleDayClick(day: Date) {
     setSelectedDate(day);
+    setSelectedEventId(null);
+  }
+
+  function handleEventClick(day: Date, eventId: string) {
+    setSelectedDate(day);
+    setSelectedEventId(eventId);
   }
 
   function handleCreateOnDay(day: Date) {
@@ -256,23 +269,36 @@ export function CrmAgendaPage() {
                     </button>
                   </div>
 
-                  <div className="mt-0.5 space-y-0.5 overflow-hidden">
+                  <div className="mt-1 space-y-1 overflow-hidden">
                     {dayEvents.slice(0, 3).map((ev) => (
-                      <div
+                      <button
                         key={ev.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEventClick(day, ev.id);
+                        }}
                         className={`
-                          text-[10px] leading-tight px-1.5 py-0.5 rounded-md truncate text-white font-medium
+                          w-full text-left text-[10px] md:text-[11px] leading-tight px-2 py-1 rounded-md truncate text-white font-medium
+                          transition-all duration-150 hover:brightness-110 hover:shadow-sm
                           ${STATUS_COLORS[ev.status] || "bg-muted"}
+                          ${selectedEventId === ev.id ? "ring-1 ring-white/80 shadow-sm" : ""}
                         `}
-                        title={ev.title}
+                        title={`${format(parseISO(ev.start_time), "HH:mm")} • ${ev.title}`}
                       >
+                        <span className="opacity-90 mr-1">{format(parseISO(ev.start_time), "HH:mm")}</span>
                         {ev.title}
-                      </div>
+                      </button>
                     ))}
                     {dayEvents.length > 3 && (
-                      <span className="text-[10px] text-muted-foreground px-1 font-medium">
-                        +{dayEvents.length - 3} mais
-                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDayClick(day);
+                        }}
+                        className="text-[10px] md:text-[11px] text-primary hover:text-primary/80 px-1 font-semibold transition-colors"
+                      >
+                        +{dayEvents.length - 3} eventos
+                      </button>
                     )}
                   </div>
                 </div>
@@ -284,7 +310,7 @@ export function CrmAgendaPage() {
         {/* Side panel */}
         <div className="w-full lg:w-80 shrink-0 space-y-4">
           {selectedDate ? (
-            <Card className="border bg-card shadow-card p-5 space-y-4">
+            <Card className="border bg-card shadow-card p-5 space-y-4 animate-in fade-in-50 slide-in-from-right-2 duration-200">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-sm capitalize">
                   {format(selectedDate, "EEEE, dd MMM", { locale: ptBR })}
@@ -319,7 +345,14 @@ export function CrmAgendaPage() {
                 <ScrollArea className="max-h-[500px]">
                   <div className="space-y-2.5">
                     {selectedDayEvents.map((ev) => (
-                      <Card key={ev.id} className="border bg-accent/20 p-3.5 space-y-2">
+                      <Card
+                        key={ev.id}
+                        onClick={() => setSelectedEventId(ev.id)}
+                        className={`
+                          border p-3.5 space-y-2 transition-all duration-150 cursor-pointer
+                          ${selectedEventId === ev.id ? "bg-primary/10 border-primary/30 shadow-sm" : "bg-accent/20 hover:bg-accent/30"}
+                        `}
+                      >
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-sm font-semibold leading-tight">{ev.title}</p>
                           <Badge
