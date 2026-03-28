@@ -69,14 +69,16 @@ export function AppShell() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const allNavItems = [
-    { to: "/crm/inbox", icon: MessageSquare, label: "Inbox", roles: ["admin", "comercial", "financeiro", "artista"] },
+    { to: "/app/inbox", icon: MessageSquare, label: "Inbox", roles: ["admin", "comercial", "financeiro", "artista"] },
     { to: "/app/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["admin", "comercial", "financeiro", "artista"] },
     { to: "/app/artist", icon: Music, label: "Painel Artista", roles: ["artista", "admin"] },
-    { to: "/app/calendar", icon: CalendarDays, label: "Agenda", roles: ["admin", "comercial", "financeiro", "artista"] },
     { to: "/app/leads", icon: Handshake, label: "Leads", roles: ["admin", "comercial", "financeiro"] },
+    { to: "/app/pipeline", icon: Kanban, label: "Pipeline", roles: ["admin", "comercial"] },
+    { to: "/app/agenda", icon: CalendarDays, label: "Agenda", roles: ["admin", "comercial", "financeiro", "artista"] },
     { to: "/app/contracts", icon: FileText, label: "Contratos", roles: ["admin", "comercial", "financeiro"] },
     { to: "/app/contacts", icon: Users, label: "Contatos", roles: ["admin", "comercial", "financeiro"] },
     { to: "/app/tasks", icon: ListChecks, label: "Tarefas", roles: ["admin", "comercial", "financeiro", "artista"] },
+    { to: "/app/whatsapp", icon: Smartphone, label: "WhatsApp", roles: ["admin", "comercial"] },
     { to: "/app/team", icon: UsersRound, label: "Equipe", roles: ["admin"] },
     { to: "/app/users", icon: UserCog, label: "Usuários", roles: ["admin"] },
     { to: "/app/map", icon: Map, label: "Mapa", roles: ["admin", "comercial", "financeiro"] },

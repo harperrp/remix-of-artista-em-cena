@@ -47,26 +47,18 @@ const App = () => (
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
 
-              {/* CRM Routes (new clean architecture) */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/crm" element={<CrmLayout />}>
-                  <Route index element={<CrmDashboardPage />} />
-                  <Route path="inbox" element={<CrmInboxPage />} />
-                  <Route path="leads" element={<CrmLeadsPage />} />
-                  <Route path="pipeline" element={<CrmPipelinePage />} />
-                  <Route path="agenda" element={<CrmAgendaPage />} />
-                  <Route path="whatsapp" element={<CrmWhatsAppPage />} />
-                </Route>
-              </Route>
-
-              {/* Legacy App Routes */}
+              {/* Unified App Routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/app" element={<AppShell />}>
                   <Route index element={<DashboardPage />} />
                   <Route path="dashboard" element={<DashboardPage />} />
                   <Route path="artist" element={<ArtistDashboardPage />} />
                   <Route path="calendar" element={<ArtistCalendarPage />} />
-                  <Route path="leads" element={<LeadsKanbanPage />} />
+                  <Route path="inbox" element={<CrmInboxPage />} />
+                  <Route path="leads" element={<CrmLeadsPage />} />
+                  <Route path="pipeline" element={<CrmPipelinePage />} />
+                  <Route path="agenda" element={<CrmAgendaPage />} />
+                  <Route path="whatsapp" element={<CrmWhatsAppPage />} />
                   <Route path="contracts" element={<ContractsCrudPage />} />
                   <Route path="contacts" element={<ContactsPage />} />
                   <Route path="tasks" element={<TasksPage />} />
