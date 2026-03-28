@@ -24,6 +24,8 @@ import {
   Music,
   Crown,
   MessageSquare,
+  Kanban,
+  Smartphone,
 } from "lucide-react";
 import { useState } from "react";
 import { QuickAddMenu } from "./QuickAddMenu";
