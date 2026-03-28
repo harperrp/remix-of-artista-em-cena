@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { OrgProvider } from "@/providers/OrgProvider";
 import { AppShell } from "@/components/layout/AppShell";
-import { CrmLayout } from "@/components/crm/CrmLayout";
+
 import { LandingPage } from "@/pages/LandingPage";
 import { DashboardPage } from "@/pages/Dashboard";
 import { LeadsKanbanPage } from "@/pages/LeadsKanban";
