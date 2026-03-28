@@ -40,7 +40,6 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
   const [text, setText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom on conversation change or new messages
   useEffect(() => {
     const el = scrollRef.current;
     if (el) {
@@ -50,10 +49,13 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
 
   if (!conversation) {
     return (
-      <div className="flex-1 flex items-center justify-center text-muted-foreground">
+      <div className="flex-1 flex items-center justify-center text-muted-foreground bg-accent/20">
         <div className="text-center">
-          <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Selecione uma conversa</p>
+          <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+            <MessageSquare className="h-7 w-7 text-muted-foreground/40" />
+          </div>
+          <p className="text-sm font-medium">Selecione uma conversa</p>
+          <p className="text-xs text-muted-foreground mt-1">Escolha um contato à esquerda para começar</p>
         </div>
       </div>
     );
@@ -64,7 +66,12 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full relative">
       {/* Header */}
-      <div className="h-14 flex items-center px-4 border-b border-border bg-card shrink-0 z-10">
+      <div className="h-14 flex items-center px-5 border-b border-border bg-card shrink-0 z-10 gap-3">
+        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <span className="text-xs font-semibold text-primary">
+            {(conversation.contact_name || conversation.contact_phone || "?")[0].toUpperCase()}
+          </span>
+        </div>
         <div>
           <p className="text-sm font-semibold text-foreground">
             {conversation.contact_name || conversation.contact_phone}
@@ -73,17 +80,17 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
         </div>
       </div>
 
-      {/* Messages — native scroll, fills available space */}
+      {/* Messages */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto bg-muted/20"
+        className="flex-1 overflow-y-auto bg-accent/10"
         style={{ scrollBehavior: "auto" }}
       >
-        <div className="p-4 pb-2 min-h-full flex flex-col justify-end">
+        <div className="p-5 pb-2 min-h-full flex flex-col justify-end">
           {grouped.map((group) => (
             <div key={group.label}>
               <div className="flex justify-center my-4">
-                <span className="text-[10px] bg-muted text-muted-foreground px-3 py-1 rounded-full shadow-sm">
+                <span className="text-[10px] bg-secondary text-muted-foreground px-3 py-1 rounded-full font-medium">
                   {group.label}
                 </span>
               </div>
@@ -91,24 +98,24 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
                 <div
                   key={msg.id}
                   className={cn(
-                    "flex mb-3",
+                    "flex mb-2.5",
                     msg.direction === "inbound" ? "justify-start" : "justify-end"
                   )}
                 >
                   <div
                     className={cn(
-                      "max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
+                      "max-w-[72%] rounded-2xl px-3.5 py-2 text-sm",
                       msg.direction === "inbound"
-                        ? "bg-card border border-border rounded-tl-sm text-foreground"
-                        : "bg-primary text-primary-foreground rounded-tr-sm"
+                        ? "bg-card border border-border rounded-bl-md text-foreground shadow-card"
+                        : "bg-primary text-primary-foreground rounded-br-md shadow-sm"
                     )}
                   >
-                    <p className="whitespace-pre-wrap break-words leading-relaxed">
+                    <p className="whitespace-pre-wrap break-words leading-relaxed text-[13px]">
                       {msg.message_text}
                     </p>
                     <p
                       className={cn(
-                        "text-[10px] mt-1.5 text-right",
+                        "text-[10px] mt-1 text-right",
                         msg.direction === "inbound"
                           ? "text-muted-foreground"
                           : "text-primary-foreground/60"
@@ -124,7 +131,7 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
         </div>
       </div>
 
-      {/* Input — fixed at bottom */}
+      {/* Input */}
       <div className="border-t border-border px-4 py-3 bg-card shrink-0">
         <form
           onSubmit={(e) => {
@@ -140,10 +147,10 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Digite uma mensagem..."
-            className="flex-1 h-10"
+            className="flex-1 h-10 bg-secondary/50 border-transparent focus:border-border"
             autoFocus
           />
-          <Button type="submit" size="icon" className="h-10 w-10 shrink-0" disabled={!text.trim() || sending}>
+          <Button type="submit" size="icon" className="h-10 w-10 shrink-0 rounded-xl" disabled={!text.trim() || sending}>
             <Send className="h-4 w-4" />
           </Button>
         </form>

@@ -43,10 +43,17 @@ import {
 import { ptBR } from "date-fns/locale";
 
 const STATUS_COLORS: Record<string, string> = {
-  confirmed: "bg-emerald-500",
-  negotiation: "bg-amber-500",
-  blocked: "bg-red-500",
-  hold: "bg-blue-400",
+  confirmed: "bg-status-confirmed/80",
+  negotiation: "bg-status-negotiation/80",
+  blocked: "bg-status-blocked/80",
+  hold: "bg-status-hold/80",
+};
+
+const STATUS_DOT: Record<string, string> = {
+  confirmed: "bg-status-confirmed",
+  negotiation: "bg-status-negotiation",
+  blocked: "bg-status-blocked",
+  hold: "bg-status-hold",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -94,7 +101,6 @@ export function CrmAgendaPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  // Build calendar grid
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
@@ -103,7 +109,6 @@ export function CrmAgendaPage() {
     return eachDayOfInterval({ start: calStart, end: calEnd });
   }, [currentMonth]);
 
-  // Index events by date
   const eventsByDate = useMemo(() => {
     const map: Record<string, typeof events> = {};
     events.forEach((ev) => {
@@ -144,7 +149,6 @@ export function CrmAgendaPage() {
     createMut.mutate(data);
   }
 
-  // Stats
   const monthEvents = useMemo(() => {
     const ms = startOfMonth(currentMonth);
     const me = endOfMonth(currentMonth);
@@ -158,15 +162,15 @@ export function CrmAgendaPage() {
   const negotiation = monthEvents.filter((e) => e.status === "negotiation").length;
 
   return (
-    <div className="p-4 md:p-6 space-y-4 fade-up">
+    <div className="space-y-5 fade-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Agenda</h1>
-          <p className="text-sm text-muted-foreground">
-            {monthEvents.length} eventos no mês •{" "}
-            <span className="text-emerald-600 dark:text-emerald-400">{confirmed} confirmados</span> •{" "}
-            <span className="text-amber-600 dark:text-amber-400">{negotiation} em negociação</span>
+          <h1 className="text-xl font-bold tracking-tight">Agenda</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {monthEvents.length} eventos •{" "}
+            <span className="text-status-confirmed">{confirmed} confirmados</span> •{" "}
+            <span className="text-status-negotiation">{negotiation} em negociação</span>
           </p>
         </div>
         <Button
@@ -174,7 +178,8 @@ export function CrmAgendaPage() {
             setCreateDate(new Date());
             setCreateOpen(true);
           }}
-          className="gap-2"
+          className="gap-2 rounded-lg"
+          size="sm"
         >
           <Plus className="h-4 w-4" /> Novo Evento
         </Button>
@@ -182,29 +187,29 @@ export function CrmAgendaPage() {
 
       {/* Month Navigation */}
       <div className="flex items-center justify-between">
-        <Button variant="outline" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold capitalize">
+          <h2 className="text-base font-semibold capitalize">
             {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
           </h2>
-          <Button variant="ghost" size="sm" onClick={() => setCurrentMonth(new Date())} className="text-xs">
+          <Button variant="ghost" size="sm" onClick={() => setCurrentMonth(new Date())} className="text-xs h-7 text-muted-foreground hover:text-foreground">
             Hoje
           </Button>
         </div>
-        <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-5">
         {/* Calendar Grid */}
-        <Card className="flex-1 border bg-card overflow-hidden">
+        <Card className="flex-1 border bg-card shadow-card overflow-hidden">
           {/* Week day headers */}
-          <div className="grid grid-cols-7 border-b bg-muted/30">
+          <div className="grid grid-cols-7 border-b bg-secondary/40">
             {weekDays.map((d) => (
-              <div key={d} className="text-center text-xs font-medium text-muted-foreground py-2">
+              <div key={d} className="text-center text-[11px] font-semibold text-muted-foreground py-2.5 tracking-wide uppercase">
                 {d}
               </div>
             ))}
@@ -224,42 +229,39 @@ export function CrmAgendaPage() {
                   key={i}
                   onClick={() => handleDayClick(day)}
                   className={`
-                    min-h-[80px] md:min-h-[100px] border-b border-r p-1 cursor-pointer transition-colors relative group
-                    ${!inMonth ? "bg-muted/20" : "hover:bg-accent/30"}
-                    ${isSelected ? "bg-accent/50 ring-1 ring-primary" : ""}
-                    ${today ? "bg-primary/5" : ""}
+                    min-h-[80px] md:min-h-[96px] border-b border-r border-border/50 p-1.5 cursor-pointer transition-all duration-150 relative group
+                    ${!inMonth ? "bg-muted/10" : "hover:bg-accent/30"}
+                    ${isSelected ? "bg-primary/5 ring-1 ring-primary/30" : ""}
+                    ${today && !isSelected ? "bg-primary/[0.03]" : ""}
                   `}
                 >
-                  {/* Day number */}
                   <div className="flex items-center justify-between">
                     <span
                       className={`
-                        text-xs font-medium inline-flex items-center justify-center h-6 w-6 rounded-full
-                        ${!inMonth ? "text-muted-foreground/40" : ""}
-                        ${today ? "bg-primary text-primary-foreground" : ""}
+                        text-xs font-medium inline-flex items-center justify-center h-6 w-6 rounded-full transition-colors
+                        ${!inMonth ? "text-muted-foreground/30" : "text-foreground/70"}
+                        ${today ? "bg-primary text-primary-foreground font-semibold" : ""}
                       `}
                     >
                       {format(day, "d")}
                     </span>
-                    {/* Quick add button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCreateOnDay(day);
                       }}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px]"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded-md bg-primary text-primary-foreground flex items-center justify-center"
                     >
                       <Plus className="h-3 w-3" />
                     </button>
                   </div>
 
-                  {/* Event indicators */}
                   <div className="mt-0.5 space-y-0.5 overflow-hidden">
                     {dayEvents.slice(0, 3).map((ev) => (
                       <div
                         key={ev.id}
                         className={`
-                          text-[10px] leading-tight px-1 py-0.5 rounded truncate text-white
+                          text-[10px] leading-tight px-1.5 py-0.5 rounded-md truncate text-white font-medium
                           ${STATUS_COLORS[ev.status] || "bg-muted"}
                         `}
                         title={ev.title}
@@ -268,7 +270,7 @@ export function CrmAgendaPage() {
                       </div>
                     ))}
                     {dayEvents.length > 3 && (
-                      <span className="text-[10px] text-muted-foreground px-1">
+                      <span className="text-[10px] text-muted-foreground px-1 font-medium">
                         +{dayEvents.length - 3} mais
                       </span>
                     )}
@@ -279,10 +281,10 @@ export function CrmAgendaPage() {
           </div>
         </Card>
 
-        {/* Side panel — selected day details */}
-        <div className="w-full lg:w-80 shrink-0">
+        {/* Side panel */}
+        <div className="w-full lg:w-80 shrink-0 space-y-4">
           {selectedDate ? (
-            <Card className="border bg-card p-4 space-y-3">
+            <Card className="border bg-card shadow-card p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-sm capitalize">
                   {format(selectedDate, "EEEE, dd MMM", { locale: ptBR })}
@@ -298,13 +300,16 @@ export function CrmAgendaPage() {
               </div>
 
               {selectedDayEvents.length === 0 ? (
-                <div className="text-center py-6">
-                  <CalendarIcon className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
-                  <p className="text-sm text-muted-foreground">Nenhum evento neste dia</p>
+                <div className="text-center py-8">
+                  <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                    <CalendarIcon className="h-5 w-5 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-sm text-muted-foreground font-medium">Nenhum evento</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Este dia está livre</p>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="mt-2 gap-1"
+                    className="mt-3 gap-1.5 text-xs"
                     onClick={() => handleCreateOnDay(selectedDate)}
                   >
                     <Plus className="h-3 w-3" /> Criar evento
@@ -312,15 +317,16 @@ export function CrmAgendaPage() {
                 </div>
               ) : (
                 <ScrollArea className="max-h-[500px]">
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {selectedDayEvents.map((ev) => (
-                      <Card key={ev.id} className="border bg-background p-3 space-y-1.5">
+                      <Card key={ev.id} className="border bg-accent/20 p-3.5 space-y-2">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-medium leading-tight">{ev.title}</p>
+                          <p className="text-sm font-semibold leading-tight">{ev.title}</p>
                           <Badge
                             variant="secondary"
-                            className={`text-[10px] text-white shrink-0 ${STATUS_COLORS[ev.status] || ""}`}
+                            className="text-[10px] shrink-0 font-medium"
                           >
+                            <span className={`h-1.5 w-1.5 rounded-full mr-1 ${STATUS_DOT[ev.status] || ""}`} />
                             {STATUS_LABELS[ev.status] || ev.status}
                           </Badge>
                         </div>
@@ -341,7 +347,7 @@ export function CrmAgendaPage() {
                           <p className="text-xs text-muted-foreground">🎤 {(ev as any).contractor_name}</p>
                         )}
                         {ev.fee != null && (
-                          <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                          <p className="text-xs font-semibold text-status-confirmed">
                             {Number(ev.fee).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                           </p>
                         )}
@@ -353,17 +359,20 @@ export function CrmAgendaPage() {
               )}
             </Card>
           ) : (
-            <Card className="border bg-card p-6 text-center">
-              <CalendarIcon className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
-              <p className="text-sm text-muted-foreground">Selecione um dia para ver os eventos</p>
+            <Card className="border bg-card shadow-card p-8 text-center">
+              <div className="h-14 w-14 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-3">
+                <CalendarIcon className="h-6 w-6 text-muted-foreground/30" />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground">Selecione um dia</p>
+              <p className="text-xs text-muted-foreground/70 mt-1">Clique em um dia para ver os eventos</p>
             </Card>
           )}
 
           {/* Legend */}
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3 px-1">
             {Object.entries(STATUS_LABELS).map(([key, label]) => (
-              <div key={key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <div className={`h-2.5 w-2.5 rounded-full ${STATUS_COLORS[key]}`} />
+              <div key={key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <div className={`h-2 w-2 rounded-full ${STATUS_DOT[key]}`} />
                 {label}
               </div>
             ))}
@@ -377,10 +386,10 @@ export function CrmAgendaPage() {
           <DialogHeader>
             <DialogTitle>Novo Evento</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label>Título *</Label>
-              <Input name="title" required />
+              <Input name="title" required className="mt-1" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -389,6 +398,7 @@ export function CrmAgendaPage() {
                   name="start_time"
                   type="datetime-local"
                   required
+                  className="mt-1"
                   defaultValue={
                     createDate
                       ? format(createDate, "yyyy-MM-dd") + "T20:00"
@@ -400,7 +410,7 @@ export function CrmAgendaPage() {
                 <Label>Status</Label>
                 <select
                   name="status"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                  className="mt-1 flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                   defaultValue="negotiation"
                 >
                   <option value="negotiation">Negociação</option>
@@ -413,13 +423,13 @@ export function CrmAgendaPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Cidade</Label>
-                <Input name="city" />
+                <Input name="city" className="mt-1" />
               </div>
               <div>
                 <Label>Lead vinculado</Label>
                 <select
                   name="lead_id"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                  className="mt-1 flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                 >
                   <option value="">Nenhum</option>
                   {leads.map((l) => (
@@ -432,7 +442,7 @@ export function CrmAgendaPage() {
             </div>
             <div>
               <Label>Observações</Label>
-              <Textarea name="notes" rows={3} />
+              <Textarea name="notes" rows={3} className="mt-1" />
             </div>
             <Button type="submit" className="w-full" disabled={createMut.isPending}>
               Criar Evento
