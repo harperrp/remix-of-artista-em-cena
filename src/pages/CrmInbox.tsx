@@ -100,7 +100,7 @@ export function CrmInboxPage() {
                 >
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium truncate">{c.contact_name || c.contact_phone}</p>
-                    {c.unread_count > 0 && (
+                    {(c.unread_count ?? 0) > 0 && (
                       <Badge variant="default" className="text-[10px] h-5 min-w-5 justify-center">
                         {c.unread_count}
                       </Badge>
