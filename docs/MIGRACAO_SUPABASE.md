@@ -35,6 +35,20 @@ supabase db push
 
 Isso aplica tabelas, views, índices, triggers, funções e políticas descritas em `supabase/migrations`.
 
+### Alternativa: SQL único consolidado (schema legado completo)
+
+Se você quiser copiar/colar um único SQL no projeto novo (SQL Editor), use:
+
+- `docs/SQL_SUPABASE_LEGADO_COMPLETO.sql`
+
+Esse arquivo consolida todas as migrations do projeto antigo em ordem cronológica e inclui:
+
+- tipos (`ENUM`)
+- tabelas e índices
+- funções e triggers
+- políticas RLS
+- extensões usadas no projeto
+
 ## 4) Migrar dados do projeto antigo para o novo
 
 ### Opção recomendada: dump/restore Postgres
@@ -66,6 +80,16 @@ Checklist:
 - [ ] Buckets criados no novo projeto
 - [ ] Políticas de storage aplicadas
 - [ ] Arquivos copiados
+
+## 5.1) Migrar Edge Functions
+
+SQL não migra Edge Functions. Para subir no novo projeto:
+
+```bash
+supabase functions deploy whatsapp-webhook
+supabase functions deploy task-deadline-notifications
+supabase functions deploy invite-user
+```
 
 ## 6) Atualizar variáveis do front-end
 
