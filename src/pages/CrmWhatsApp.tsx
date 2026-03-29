@@ -131,12 +131,12 @@ export function CrmWhatsAppPage() {
 
           <div className="h-64 w-64 mx-auto bg-white rounded-lg flex items-center justify-center border border-border overflow-hidden p-3">
             {qrUrl ? (
-              <img
-                src={qrUrl}
-                alt="QR Code WhatsApp"
-                className="w-full h-full object-contain"
-              />
-            ) : (
+  <iframe
+    src={qrUrl}
+    title="QR Code WhatsApp"
+    className="w-full h-full border-0 rounded"
+  />
+) : (
               <div className="text-center">
                 <RefreshCw className="h-8 w-8 mx-auto mb-2 text-muted-foreground animate-spin" />
                 <p className="text-xs text-muted-foreground">Carregando QR...</p>
