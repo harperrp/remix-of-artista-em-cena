@@ -34,15 +34,20 @@ export function CrmInboxPage() {
   });
 
   useEffect(() => {
-    if (!selected?.lead_id) return;
-    return api.subscribeToTable("lead_messages", `lead_id=eq.${selected.lead_id}`, () => {
-      qc.invalidateQueries({ queryKey: ["crm-messages", selected.lead_id] });
+    if (!activeOrgId) return;
+
+    return api.subscribeToTable("lead_messages", null, () => {
       qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
+
+      if (selected?.lead_id) {
+        qc.invalidateQueries({ queryKey: ["crm-messages", selected.lead_id] });
+      }
     });
-  }, [selected?.lead_id, qc, activeOrgId]);
+  }, [activeOrgId, selected?.lead_id, qc]);
 
   useEffect(() => {
     if (!activeOrgId) return;
+
     return api.subscribeToTable("leads", `organization_id=eq.${activeOrgId}`, () => {
       qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
     });
@@ -50,6 +55,7 @@ export function CrmInboxPage() {
 
   useEffect(() => {
     if (!selectedId || !selected?.lead_id) return;
+
     if ((selected.unread_count ?? 0) > 0) {
       api.markConversationRead(selected.lead_id).then(() => {
         qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
@@ -60,6 +66,7 @@ export function CrmInboxPage() {
   const sendMut = useMutation({
     mutationFn: (text: string) => {
       if (!selected?.lead_id) throw new Error("Conversa sem lead vinculado");
+
       return api.sendMessage({
         lead_id: selected.lead_id,
         organization_id: activeOrgId!,
@@ -81,12 +88,14 @@ export function CrmInboxPage() {
         stages={stages}
         onSelect={setSelectedId}
       />
+
       <ChatPanel
         conversation={selected}
         messages={messages}
         onSend={(text) => sendMut.mutate(text)}
         sending={sendMut.isPending}
       />
+
       {selected && <LeadPanel conversation={selected} stages={stages} />}
     </div>
   );
