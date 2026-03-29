@@ -32,6 +32,7 @@ export interface Conversation {
   unread_count: number;
   status: string;
   created_at: string;
+  stage?: string | null;
   // Joined
   lead?: Lead | null;
 }
@@ -46,6 +47,9 @@ export interface Message {
   message_type: string;
   media_url?: string | null;
   wa_id?: string | null;
+  provider?: string | null;
+  provider_message_id?: string | null;
+  status?: string | null;
   created_at: string;
 }
 

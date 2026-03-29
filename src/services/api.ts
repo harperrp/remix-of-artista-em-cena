@@ -1,11 +1,9 @@
 // ── Service Layer ──
 // All database access goes through here. Components NEVER import supabase directly.
-// When migrating to a custom VPS API, only this file changes.
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Lead, Conversation, Message, PipelineStage, CalendarEvent } from "@/types/crm";
 
-// ── Auth ──
 export async function getCurrentUser() {
   const { data } = await supabase.auth.getUser();
   return data.user;
@@ -16,7 +14,6 @@ export async function getSession() {
   return data.session;
 }
 
-// ── Profile / Org ──
 export async function getProfile(userId: string) {
   const { data, error } = await supabase
     .from("profiles")
@@ -27,7 +24,6 @@ export async function getProfile(userId: string) {
   return data;
 }
 
-// ── Leads ──
 export async function fetchLeads(orgId: string): Promise<Lead[]> {
   const { data, error } = await supabase
     .from("leads")
@@ -50,7 +46,6 @@ export async function updateLead(id: string, updates: Partial<Lead>) {
   return data as Lead;
 }
 
-// ── Pipeline Stages ──
 export async function fetchStages(orgId: string): Promise<PipelineStage[]> {
   const { data, error } = await supabase
     .from("funnel_stages")
@@ -61,28 +56,41 @@ export async function fetchStages(orgId: string): Promise<PipelineStage[]> {
   return (data ?? []) as PipelineStage[];
 }
 
-// ── Conversations ──
 export async function fetchConversations(orgId: string): Promise<Conversation[]> {
   const { data, error } = await supabase
-    .from("conversations")
-    .select("*, lead:leads(id, contractor_name, stage, contact_phone)")
+    .from("leads")
+    .select("id, organization_id, contractor_name, stage, contact_phone, whatsapp_phone, last_message, last_message_at, unread_count, created_at")
     .eq("organization_id", orgId)
-    .order("last_message_at", { ascending: false });
+    .order("last_message_at", { ascending: false, nullsFirst: false });
+
   if (error) throw error;
-  return (data ?? []) as any[];
+
+  return (data ?? []).map((lead: any) => ({
+    id: lead.id,
+    organization_id: lead.organization_id,
+    lead_id: lead.id,
+    contact_phone: lead.whatsapp_phone || lead.contact_phone || "",
+    contact_name: lead.contractor_name,
+    last_message_at: lead.last_message_at || lead.created_at,
+    last_message_text: lead.last_message,
+    unread_count: lead.unread_count ?? 0,
+    status: "open",
+    created_at: lead.created_at,
+    lead,
+    stage: lead.stage,
+  }));
 }
 
 export async function updateConversation(id: string, updates: Partial<Conversation>) {
-  const { error } = await supabase.from("conversations").update(updates).eq("id", id);
+  const { error } = await supabase.from("leads").update(updates as any).eq("id", id);
   if (error) throw error;
 }
 
-export async function markConversationRead(id: string) {
-  const { error } = await supabase.from("conversations").update({ unread_count: 0 }).eq("id", id);
+export async function markConversationRead(leadId: string) {
+  const { error } = await supabase.rpc("mark_lead_conversation_read", { _lead_id: leadId });
   if (error) throw error;
 }
 
-// ── Notes ──
 export async function fetchNotes(entityId: string) {
   const { data, error } = await supabase
     .from("notes")
@@ -99,38 +107,40 @@ export async function createNote(note: { organization_id: string; entity_id: str
   return data;
 }
 
-// ── Messages ──
-export async function fetchMessages(conversationId: string): Promise<Message[]> {
+export async function fetchMessages(leadId: string): Promise<Message[]> {
   const { data, error } = await supabase
     .from("lead_messages")
     .select("*")
-    .eq("conversation_id", conversationId)
+    .eq("lead_id", leadId)
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data ?? []) as Message[];
 }
 
 export async function sendMessage(msg: {
-  lead_id: string;
+  lead_id?: string;
   organization_id: string;
-  conversation_id: string;
-  message_text: string;
-  direction: "outbound";
+  message_text?: string;
+  to?: string;
+  mode?: "cloud" | "vps";
+  media_url?: string;
 }) {
-  const { data, error } = await supabase.from("lead_messages").insert({
-    ...msg,
-    message_type: "text",
-  }).select().single();
+  const { data, error } = await supabase.functions.invoke("wa-send-message", {
+    body: {
+      leadId: msg.lead_id,
+      organizationId: msg.organization_id,
+      to: msg.to,
+      text: msg.message_text,
+      mode: msg.mode ?? "cloud",
+      media_url: msg.media_url,
+    },
+  });
+
   if (error) throw error;
-  // Update conversation last_message
-  await supabase.from("conversations").update({
-    last_message_at: new Date().toISOString(),
-    last_message_text: msg.message_text,
-  }).eq("id", msg.conversation_id);
-  return data as Message;
+  if (!data?.ok) throw new Error(data?.error ?? "Erro ao enviar mensagem");
+  return data;
 }
 
-// ── Calendar Events ──
 export async function fetchEvents(orgId: string): Promise<CalendarEvent[]> {
   const { data, error } = await supabase
     .from("calendar_events")
@@ -147,11 +157,12 @@ export async function createEvent(event: Partial<CalendarEvent> & { organization
   return data as CalendarEvent;
 }
 
-// ── Realtime helpers ──
-export function subscribeToTable(table: string, filter: string, callback: () => void) {
+export function subscribeToTable(table: string, filter: string | null, callback: () => void) {
   const channel = supabase
     .channel(`rt-${table}-${Date.now()}`)
-    .on("postgres_changes", { event: "*", schema: "public", table, filter }, callback)
+    .on("postgres_changes", { event: "*", schema: "public", table, ...(filter ? { filter } : {}) }, callback)
     .subscribe();
-  return () => { supabase.removeChannel(channel); };
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }

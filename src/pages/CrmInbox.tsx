@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "@/providers/OrgProvider";
-import { useAuth } from "@/providers/AuthProvider";
 import * as api from "@/services/api";
 import { toast } from "sonner";
 
@@ -11,7 +10,6 @@ import { LeadPanel } from "@/components/inbox/LeadPanel";
 
 export function CrmInboxPage() {
   const { activeOrgId } = useOrg();
-  const { user } = useAuth();
   const qc = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -24,9 +22,9 @@ export function CrmInboxPage() {
   const selected = conversations.find((c) => c.id === selectedId) ?? null;
 
   const { data: messages = [] } = useQuery({
-    queryKey: ["crm-messages", selectedId],
-    queryFn: () => api.fetchMessages(selectedId!),
-    enabled: !!selectedId,
+    queryKey: ["crm-messages", selected?.lead_id],
+    queryFn: () => api.fetchMessages(selected!.lead_id!),
+    enabled: !!selected?.lead_id,
   });
 
   const { data: stages = [] } = useQuery({
@@ -35,24 +33,29 @@ export function CrmInboxPage() {
     enabled: !!activeOrgId,
   });
 
-  // Realtime messages
   useEffect(() => {
-    if (!selectedId) return;
-    return api.subscribeToTable("lead_messages", `conversation_id=eq.${selectedId}`, () => {
-      qc.invalidateQueries({ queryKey: ["crm-messages", selectedId] });
-      qc.invalidateQueries({ queryKey: ["crm-conversations"] });
+    if (!selected?.lead_id) return;
+    return api.subscribeToTable("lead_messages", `lead_id=eq.${selected.lead_id}`, () => {
+      qc.invalidateQueries({ queryKey: ["crm-messages", selected.lead_id] });
+      qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
     });
-  }, [selectedId, qc]);
+  }, [selected?.lead_id, qc, activeOrgId]);
 
-  // Mark as read when selecting
   useEffect(() => {
-    if (!selectedId || !selected) return;
+    if (!activeOrgId) return;
+    return api.subscribeToTable("leads", `organization_id=eq.${activeOrgId}`, () => {
+      qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
+    });
+  }, [activeOrgId, qc]);
+
+  useEffect(() => {
+    if (!selectedId || !selected?.lead_id) return;
     if ((selected.unread_count ?? 0) > 0) {
-      api.markConversationRead(selectedId).then(() => {
-        qc.invalidateQueries({ queryKey: ["crm-conversations"] });
+      api.markConversationRead(selected.lead_id).then(() => {
+        qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
       });
     }
-  }, [selectedId]);
+  }, [selectedId, selected?.lead_id, selected?.unread_count, qc, activeOrgId]);
 
   const sendMut = useMutation({
     mutationFn: (text: string) => {
@@ -60,14 +63,12 @@ export function CrmInboxPage() {
       return api.sendMessage({
         lead_id: selected.lead_id,
         organization_id: activeOrgId!,
-        conversation_id: selectedId!,
         message_text: text,
-        direction: "outbound",
       });
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["crm-messages", selectedId] });
-      qc.invalidateQueries({ queryKey: ["crm-conversations"] });
+      qc.invalidateQueries({ queryKey: ["crm-messages", selected?.lead_id] });
+      qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -77,6 +78,7 @@ export function CrmInboxPage() {
       <ConversationList
         conversations={conversations}
         selectedId={selectedId}
+        stages={stages}
         onSelect={setSelectedId}
       />
       <ChatPanel

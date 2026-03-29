@@ -3,5 +3,11 @@ project_id = "uhumbtpkioisepqiqot"
 [functions.whatsapp-webhook]
 verify_jwt = false
 
+[functions.whatsapp-webhook-baileys]
+verify_jwt = false
+
+[functions.wa-send-message]
+verify_jwt = false
+
 [functions.task-deadline-notifications]
 verify_jwt = false
