@@ -113,6 +113,11 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
                     <p className="whitespace-pre-wrap break-words leading-relaxed text-[13px]">
                       {msg.message_text}
                     </p>
+                    {msg.media_url && (
+                      <a href={msg.media_url} target="_blank" rel="noreferrer" className="text-[11px] underline opacity-90">
+                        Ver mídia ({msg.message_type})
+                      </a>
+                    )}
                     <p
                       className={cn(
                         "text-[10px] mt-1 text-right",
