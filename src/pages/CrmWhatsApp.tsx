@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Smartphone, Wifi, WifiOff, QrCode, RefreshCw, type LucideIcon } from "lucide-react";
+import { Smartphone, Wifi, WifiOff, QrCode, RefreshCw } from "lucide-react";
 import { whatsappService } from "@/services/whatsapp";
 import { toast } from "sonner";
 import type { WhatsAppStatus } from "@/types/crm";
-import { CrmPageHeader } from "@/components/crm/CrmPageHeader";
-import { CrmStateCard } from "@/components/crm/CrmStateCard";
 
-const statusConfig: Record<WhatsAppStatus, { label: string; color: string; icon: LucideIcon }> = {
+const statusConfig: Record<WhatsAppStatus, { label: string; color: string; icon: any }> = {
   disconnected: { label: "Desconectado", color: "text-red-400", icon: WifiOff },
   connecting: { label: "Conectando...", color: "text-yellow-400", icon: RefreshCw },
   qr_ready: { label: "QR Code Pronto", color: "text-blue-400", icon: QrCode },
@@ -20,8 +18,6 @@ export function CrmWhatsAppPage() {
   const [loading, setLoading] = useState(false);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [qrVersion, setQrVersion] = useState(0);
-  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
-  const [serviceError, setServiceError] = useState<string | null>(null);
 
   async function refreshStatus() {
     try {
@@ -32,18 +28,15 @@ export function CrmWhatsAppPage() {
           : s?.status || "disconnected";
 
       setStatus(nextStatus);
-      setLastSyncAt(new Date().toISOString());
-      setServiceError(null);
 
       if (nextStatus === "qr_ready") {
         setQrUrl(`${whatsappService.getQrImage()}?t=${Date.now()}&v=${qrVersion}`);
       } else {
         setQrUrl(null);
       }
-    } catch (e) {
+    } catch {
       setStatus("disconnected");
       setQrUrl(null);
-      setServiceError(e instanceof Error ? e.message : "Erro ao consultar serviço");
     }
   }
 
@@ -60,8 +53,8 @@ export function CrmWhatsAppPage() {
       setQrVersion((v) => v + 1);
       toast.success("Solicitação de conexão enviada");
       await refreshStatus();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erro ao conectar");
+    } catch {
+      toast.error("Erro ao conectar");
     } finally {
       setLoading(false);
     }
@@ -74,8 +67,8 @@ export function CrmWhatsAppPage() {
       setQrUrl(null);
       toast.success("Desconectado");
       await refreshStatus();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erro ao desconectar");
+    } catch {
+      toast.error("Erro ao desconectar");
     } finally {
       setLoading(false);
     }
@@ -85,16 +78,13 @@ export function CrmWhatsAppPage() {
   const StatusIcon = cfg.icon ?? WifiOff;
 
   return (
-    <div className="space-y-6 fade-up max-w-3xl">
-      <CrmPageHeader title="WhatsApp" description="Gerenciar conexão com WhatsApp Business" />
-
-      {serviceError && (
-        <CrmStateCard
-          tone="error"
-          message={`Falha ao consultar serviço: ${serviceError}`}
-          className="p-4 text-sm"
-        />
-      )}
+    <div className="p-6 space-y-6 fade-up max-w-2xl">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">WhatsApp</h1>
+        <p className="text-sm text-muted-foreground">
+          Gerenciar conexão com WhatsApp Business
+        </p>
+      </div>
 
       <Card className="border bg-card p-6">
         <div className="flex items-center gap-4">
@@ -108,15 +98,9 @@ export function CrmWhatsAppPage() {
               <StatusIcon className={`h-4 w-4 ${cfg.color}`} />
               <span className={`text-sm font-medium ${cfg.color}`}>{cfg.label}</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Última sincronização: {lastSyncAt ? new Date(lastSyncAt).toLocaleTimeString("pt-BR") : "—"}
-            </p>
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={refreshStatus} disabled={loading} className="gap-2">
-              <RefreshCw className="h-4 w-4" /> Atualizar
-            </Button>
             {(status === "disconnected" || status === "qr_ready") && (
               <Button onClick={handleConnect} disabled={loading} className="gap-2">
                 <QrCode className="h-4 w-4" />
@@ -141,12 +125,18 @@ export function CrmWhatsAppPage() {
 
       {status === "qr_ready" && (
         <Card className="border bg-card p-6 text-center">
-          <p className="text-sm font-semibold mb-4">Escaneie o QR Code com seu WhatsApp</p>
+          <p className="text-sm font-semibold mb-4">
+            Escaneie o QR Code com seu WhatsApp
+          </p>
 
           <div className="h-64 w-64 mx-auto bg-white rounded-lg flex items-center justify-center border border-border overflow-hidden p-3">
             {qrUrl ? (
-              <iframe src={qrUrl} title="QR Code WhatsApp" className="w-full h-full border-0 rounded" />
-            ) : (
+  <iframe
+    src={qrUrl}
+    title="QR Code WhatsApp"
+    className="w-full h-full border-0 rounded"
+  />
+) : (
               <div className="text-center">
                 <RefreshCw className="h-8 w-8 mx-auto mb-2 text-muted-foreground animate-spin" />
                 <p className="text-xs text-muted-foreground">Carregando QR...</p>
@@ -154,9 +144,24 @@ export function CrmWhatsAppPage() {
             )}
           </div>
 
-          <p className="text-xs text-muted-foreground mt-4">Abra o WhatsApp no celular → Aparelhos conectados → Conectar aparelho</p>
+          <p className="text-xs text-muted-foreground mt-4">
+            Abra o WhatsApp no celular → Aparelhos conectados → Conectar aparelho
+          </p>
         </Card>
       )}
+
+      <Card className="border bg-card p-5">
+        <p className="text-xs font-semibold text-muted-foreground mb-2">ARQUITETURA</p>
+        <div className="space-y-2 text-xs text-muted-foreground">
+          <p>• Integração ativa com VPS (Contabo + Baileys)</p>
+          <p>• Endpoints: start, logout, status, qr-image</p>
+          <p>• QR carregado diretamente do servidor HTTPS</p>
+          <p>
+            • Serviço configurado em{" "}
+            <code className="bg-accent px-1 rounded">src/services/whatsapp.ts</code>
+          </p>
+        </div>
+      </Card>
     </div>
   );
 }

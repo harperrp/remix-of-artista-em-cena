@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
-import { CrmPageHeader } from "@/components/crm/CrmPageHeader";
-import { CrmStateCard } from "@/components/crm/CrmStateCard";
 import { LayoutDashboard, MessageSquare, Users, TrendingUp } from "lucide-react";
 import { useOrg } from "@/providers/OrgProvider";
 import * as api from "@/services/api";
@@ -9,13 +7,13 @@ import * as api from "@/services/api";
 export function CrmDashboardPage() {
   const { activeOrgId } = useOrg();
 
-  const { data: leads = [], isLoading: loadingLeads, isError: leadsError } = useQuery({
+  const { data: leads = [] } = useQuery({
     queryKey: ["crm-leads", activeOrgId],
     queryFn: () => api.fetchLeads(activeOrgId!),
     enabled: !!activeOrgId,
   });
 
-  const { data: conversations = [], isLoading: loadingConversations, isError: conversationsError } = useQuery({
+  const { data: conversations = [] } = useQuery({
     queryKey: ["crm-conversations", activeOrgId],
     queryFn: () => api.fetchConversations(activeOrgId!),
     enabled: !!activeOrgId,
@@ -31,19 +29,12 @@ export function CrmDashboardPage() {
     { label: "Fechados", value: closedDeals, icon: LayoutDashboard, color: "text-emerald-400" },
   ];
 
-
-
-  if (loadingLeads || loadingConversations) {
-    return <CrmStateCard message="Carregando dashboard CRM..." />;
-  }
-
-  if (leadsError || conversationsError) {
-    return <CrmStateCard tone="error" message="Erro ao carregar dados do dashboard." />;
-  }
-
   return (
-    <div className="space-y-6 fade-up">
-      <CrmPageHeader title="Dashboard" description="Visão geral do CRM" />
+    <div className="p-6 space-y-6 fade-up">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">Visão geral do CRM</p>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (

@@ -41,8 +41,6 @@ import {
   subMonths,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CrmPageHeader } from "@/components/crm/CrmPageHeader";
-import { CrmStateCard } from "@/components/crm/CrmStateCard";
 
 const STATUS_COLORS: Record<string, string> = {
   confirmed: "bg-status-confirmed/80",
@@ -76,7 +74,7 @@ export function CrmAgendaPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [createDate, setCreateDate] = useState<Date | null>(null);
 
-  const { data: events = [], isLoading, isError } = useQuery({
+  const { data: events = [], isLoading } = useQuery({
     queryKey: ["crm-events", activeOrgId],
     queryFn: () => api.fetchEvents(activeOrgId!),
     enabled: !!activeOrgId,
@@ -89,7 +87,7 @@ export function CrmAgendaPage() {
   });
 
   const createMut = useMutation({
-    mutationFn: (form: Partial<import("@/types/crm").CalendarEvent>) =>
+    mutationFn: (form: any) =>
       api.createEvent({
         ...form,
         organization_id: activeOrgId!,
@@ -101,7 +99,7 @@ export function CrmAgendaPage() {
       setCreateOpen(false);
       setCreateDate(null);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: any) => toast.error(e.message),
   });
 
   const calendarDays = useMemo(() => {
@@ -134,7 +132,6 @@ export function CrmAgendaPage() {
   }, [selectedDate, eventsByDate]);
 
   const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-  const leadNameById = new Map(leads.map((lead) => [lead.id, lead.contractor_name]));
 
   function handleDayClick(day: Date) {
     setSelectedDate(day);
@@ -154,9 +151,9 @@ export function CrmAgendaPage() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const data = {
-      title: String(fd.get("title") ?? ""),
-      start_time: String(fd.get("start_time") ?? ""),
+    const data: any = {
+      title: fd.get("title"),
+      start_time: fd.get("start_time"),
       city: fd.get("city") || null,
       notes: fd.get("notes") || null,
       lead_id: fd.get("lead_id") || null,
@@ -164,7 +161,6 @@ export function CrmAgendaPage() {
     };
     createMut.mutate(data);
   }
-
 
   const monthEvents = useMemo(() => {
     const ms = startOfMonth(currentMonth);
@@ -178,33 +174,29 @@ export function CrmAgendaPage() {
   const confirmed = monthEvents.filter((e) => e.status === "confirmed").length;
   const negotiation = monthEvents.filter((e) => e.status === "negotiation").length;
 
-  if (isLoading) {
-    return <CrmStateCard message="Carregando agenda..." />;
-  }
-
-  if (isError) {
-    return <CrmStateCard tone="error" message="Erro ao carregar agenda." />;
-  }
-
   return (
     <div className="space-y-5 fade-up">
       {/* Header */}
-      <CrmPageHeader
-        title="Agenda"
-        description={`${monthEvents.length} eventos • ${confirmed} confirmados • ${negotiation} em negociação`}
-        actions={
-          <Button
-            onClick={() => {
-              setCreateDate(new Date());
-              setCreateOpen(true);
-            }}
-            className="gap-2 rounded-lg"
-            size="sm"
-          >
-            <Plus className="h-4 w-4" /> Novo Evento
-          </Button>
-        }
-      />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Agenda</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {monthEvents.length} eventos •{" "}
+            <span className="text-status-confirmed">{confirmed} confirmados</span> •{" "}
+            <span className="text-status-negotiation">{negotiation} em negociação</span>
+          </p>
+        </div>
+        <Button
+          onClick={() => {
+            setCreateDate(new Date());
+            setCreateOpen(true);
+          }}
+          className="gap-2 rounded-lg"
+          size="sm"
+        >
+          <Plus className="h-4 w-4" /> Novo Evento
+        </Button>
+      </div>
 
       {/* Month Navigation */}
       <div className="flex items-center justify-between">
@@ -384,8 +376,8 @@ export function CrmAgendaPage() {
                             </span>
                           )}
                         </div>
-                        {ev.lead_id && leadNameById.get(ev.lead_id) && (
-                          <p className="text-xs text-muted-foreground">🎤 {leadNameById.get(ev.lead_id)}</p>
+                        {(ev as any).contractor_name && (
+                          <p className="text-xs text-muted-foreground">🎤 {(ev as any).contractor_name}</p>
                         )}
                         {ev.fee != null && (
                           <p className="text-xs font-semibold text-status-confirmed">

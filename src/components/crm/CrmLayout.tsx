@@ -16,12 +16,12 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
 const nav = [
-  { to: "/app", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/app/inbox", icon: MessageSquare, label: "Inbox" },
-  { to: "/app/leads", icon: Users, label: "Leads" },
-  { to: "/app/pipeline", icon: Kanban, label: "Pipeline" },
-  { to: "/app/agenda", icon: Calendar, label: "Agenda" },
-  { to: "/app/whatsapp", icon: Smartphone, label: "WhatsApp" },
+  { to: "/crm", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/crm/inbox", icon: MessageSquare, label: "Inbox" },
+  { to: "/crm/leads", icon: Users, label: "Leads" },
+  { to: "/crm/pipeline", icon: Kanban, label: "Pipeline" },
+  { to: "/crm/agenda", icon: Calendar, label: "Agenda" },
+  { to: "/crm/whatsapp", icon: Smartphone, label: "WhatsApp" },
 ];
 
 export function CrmLayout() {
@@ -57,7 +57,7 @@ export function CrmLayout() {
         {/* Nav */}
         <nav className="flex-1 space-y-1 p-2">
           {nav.map((item) => {
-            const active = pathname === item.to || (item.to !== "/app" && pathname.startsWith(item.to));
+            const active = pathname === item.to || (item.to !== "/crm" && pathname.startsWith(item.to));
             return (
               <Link
                 key={item.to}
