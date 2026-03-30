@@ -6,22 +6,23 @@ import { Phone, MapPin, DollarSign } from "lucide-react";
 import { useOrg } from "@/providers/OrgProvider";
 import * as api from "@/services/api";
 import { toast } from "sonner";
-import type { Lead, PipelineStage } from "@/types/crm";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { CrmPageHeader } from "@/components/crm/CrmPageHeader";
+import { CrmStateCard } from "@/components/crm/CrmStateCard";
 
 export function CrmPipelinePage() {
   const { activeOrgId } = useOrg();
   const qc = useQueryClient();
   const [justDroppedId, setJustDroppedId] = useState<string | null>(null);
 
-  const { data: stages = [] } = useQuery({
+  const { data: stages = [], isLoading: loadingStages, isError: stagesError } = useQuery({
     queryKey: ["crm-stages", activeOrgId],
     queryFn: () => api.fetchStages(activeOrgId!),
     enabled: !!activeOrgId,
   });
 
-  const { data: leads = [] } = useQuery({
+  const { data: leads = [], isLoading: loadingLeads, isError: leadsError } = useQuery({
     queryKey: ["crm-leads", activeOrgId],
     queryFn: () => api.fetchLeads(activeOrgId!),
     enabled: !!activeOrgId,
@@ -48,17 +49,26 @@ export function CrmPipelinePage() {
       await api.updateLead(leadId, { stage: newStage });
       qc.invalidateQueries({ queryKey: ["crm-leads"] });
       toast.success(`Lead movido para ${newStage}`);
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao mover lead");
     }
   }
 
+
+  if (loadingStages || loadingLeads) {
+    return <CrmStateCard message="Carregando pipeline..." />;
+  }
+
+  if (stagesError || leadsError) {
+    return <CrmStateCard tone="error" message="Erro ao carregar pipeline." />;
+  }
+
+  if (stages.length === 0) {
+    return <CrmStateCard message="Nenhuma etapa configurada para este funil." />;
+  }
   return (
-    <div className="p-6 space-y-4 fade-up">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Pipeline</h1>
-        <p className="text-sm text-muted-foreground">Arraste leads entre as etapas</p>
-      </div>
+    <div className="space-y-5 fade-up">
+      <CrmPageHeader title="Pipeline" description="Arraste leads entre as etapas" />
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4">
