@@ -19,6 +19,7 @@ import { useCalendarEvents } from "@/hooks/useCrmQueries";
 import { db } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { geocodeAddress } from "@/lib/geocoding";
 
 import { MonthSummary } from "./MonthSummary";
 import { DetailsPanel } from "./DetailsPanel";
@@ -37,6 +38,7 @@ function mapDbEventToUi(row: any): CalendarEvent {
     state: row.state ?? undefined,
     fee: row.fee ?? undefined,
     funnelStage: row.stage ?? undefined,
+    contractorName: row.contractor_name ?? undefined,
     contractStatus:
       row.contract_status === "pending"
         ? "Pendente"
@@ -169,6 +171,7 @@ export function ArtistCalendarPage() {
         end_time: result.event.end ?? null,
         city: result.event.city ?? null,
         state: result.event.state ?? null,
+        contractor_name: result.event.contractorName ?? null,
         fee: result.event.fee ?? null,
         stage: result.event.funnelStage ?? null,
         contract_status:
@@ -182,6 +185,17 @@ export function ArtistCalendarPage() {
         notes: result.event.notes ?? null,
         created_by: user.id,
       };
+
+      if (result.event.city || result.event.state) {
+        const coords = await geocodeAddress({
+          city: result.event.city,
+          state: result.event.state,
+        });
+        if (coords) {
+          (payload as any).latitude = coords.lat;
+          (payload as any).longitude = coords.lng;
+        }
+      }
 
       const { error } = await db.from("calendar_events").upsert(payload, { onConflict: "id" });
       if (error) {

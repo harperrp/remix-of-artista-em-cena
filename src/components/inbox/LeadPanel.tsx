@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { User, Phone, MapPin, Send } from "lucide-react";
 import { useOrg } from "@/providers/OrgProvider";
@@ -22,9 +23,16 @@ export function LeadPanel({ conversation, stages }: Props) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [noteText, setNoteText] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
 
   const lead = conversation.lead as any;
   const leadId = lead?.id;
+
+  useEffect(() => {
+    setEditName(lead?.contractor_name || conversation.contact_name || "");
+    setEditPhone(lead?.contact_phone || conversation.contact_phone || "");
+  }, [lead?.id, lead?.contractor_name, lead?.contact_phone, conversation.contact_name, conversation.contact_phone]);
 
   const { data: notes = [] } = useQuery({
     queryKey: ["notes", leadId],
@@ -49,12 +57,28 @@ export function LeadPanel({ conversation, stages }: Props) {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const updateLeadMut = useMutation({
+    mutationFn: async () => {
+      if (!leadId) throw new Error("Lead não encontrado");
+      return api.updateLead(leadId, {
+        contractor_name: editName.trim() || "Sem nome",
+        contact_phone: editPhone.trim() || null,
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
+      qc.invalidateQueries({ queryKey: ["crm-leads"] });
+      toast.success("Contato atualizado");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const handleStageChange = async (stageName: string) => {
     if (!leadId) return;
     try {
       await api.updateLead(leadId, { stage: stageName });
       qc.invalidateQueries({ queryKey: ["crm-leads"] });
-      qc.invalidateQueries({ queryKey: ["crm-conversations"] });
+      qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
       toast.success(`Movido para ${stageName}`);
     } catch (e: any) {
       toast.error(e.message);
@@ -93,6 +117,35 @@ export function LeadPanel({ conversation, stages }: Props) {
                 <MapPin className="h-3 w-3" /> {[lead.city, lead.state].filter(Boolean).join(", ")}
               </p>
             )}
+            <form
+              className="pt-2 space-y-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                updateLeadMut.mutate();
+              }}
+            >
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Nome do cliente"
+                className="h-8 text-xs"
+              />
+              <Input
+                value={editPhone}
+                onChange={(e) => setEditPhone(e.target.value)}
+                placeholder="Telefone do cliente"
+                className="h-8 text-xs"
+              />
+              <Button
+                type="submit"
+                size="sm"
+                variant="outline"
+                className="w-full text-xs"
+                disabled={updateLeadMut.isPending}
+              >
+                Salvar contato
+              </Button>
+            </form>
           </Card>
         )}
 
