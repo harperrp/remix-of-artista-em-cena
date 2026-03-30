@@ -2,7 +2,7 @@
 
 Este guia cobre migração **completa**: schema, policies, functions, storage e dados.
 
-> Destino atual deste repositório: `https://urbicchizsitntoxzvbh.supabase.co`.
+> Destino atual deste repositório: `https://<project-ref>.supabase.co` (valor configurado por ambiente).
 
 ## 1) Pré-requisitos
 
@@ -15,14 +15,14 @@ Este guia cobre migração **completa**: schema, policies, functions, storage e 
 No arquivo `supabase/config.toml`, confirme:
 
 ```toml
-project_id = "urbicchizsitntoxzvbh"
+project_id = "uhumbtpkioisepqiqotl"
 ```
 
 Depois, rode:
 
 ```bash
 supabase login
-supabase link --project-ref urbicchizsitntoxzvbh
+supabase link --project-ref uhumbtpkioisepqiqotl
 ```
 
 ## 3) Aplicar estrutura do banco no projeto novo
@@ -96,8 +96,8 @@ supabase functions deploy invite-user
 No `.env`, mantenha os valores do projeto novo:
 
 ```env
-VITE_SUPABASE_PROJECT_ID="urbicchizsitntoxzvbh"
-VITE_SUPABASE_URL="https://urbicchizsitntoxzvbh.supabase.co"
+VITE_SUPABASE_PROJECT_ID="uhumbtpkioisepqiqotl"
+VITE_SUPABASE_URL="https://<project-ref>.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY="<anon_key_do_projeto_novo>"
 ```
 

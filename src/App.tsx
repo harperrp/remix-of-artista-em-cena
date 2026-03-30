@@ -2,14 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { OrgProvider } from "@/providers/OrgProvider";
 import { AppShell } from "@/components/layout/AppShell";
 
 import { LandingPage } from "@/pages/LandingPage";
 import { DashboardPage } from "@/pages/Dashboard";
-import { LeadsKanbanPage } from "@/pages/LeadsKanban";
 import { ContractsCrudPage } from "@/pages/ContractsCrud";
 import { MapViewPage } from "@/pages/MapView";
 import { FinancialPage } from "@/pages/Financial";
@@ -69,6 +68,16 @@ const App = () => (
                   <Route path="admin" element={<SuperAdminPage />} />
                 </Route>
               </Route>
+
+
+
+              {/* Legacy CRM route aliases */}
+              <Route path="/crm" element={<Navigate to="/app/dashboard" replace />} />
+              <Route path="/crm/inbox" element={<Navigate to="/app/inbox" replace />} />
+              <Route path="/crm/leads" element={<Navigate to="/app/leads" replace />} />
+              <Route path="/crm/pipeline" element={<Navigate to="/app/pipeline" replace />} />
+              <Route path="/crm/agenda" element={<Navigate to="/app/agenda" replace />} />
+              <Route path="/crm/whatsapp" element={<Navigate to="/app/whatsapp" replace />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

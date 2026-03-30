@@ -6,7 +6,7 @@ Aplicação React + Supabase para gestão de artistas, CRM e financeiro.
 
 Este repositório está configurado para usar o projeto:
 
-- **Project ID:** `uhumbtpkioisepqiqot`
+- **Project ID:** `uhumbtpkioisepqiqotl`
 
 ## Rodando localmente
 
@@ -54,6 +54,14 @@ supabase functions deploy wa-send-message --no-verify-jwt
 A migration já adiciona `leads`, `lead_messages` e `lead_interactions` em `supabase_realtime`.
 
 ### Frontend
+
+Variáveis mínimas no `.env`:
+
+```env
+VITE_SUPABASE_URL="https://<project-ref>.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY="<anon_key>"
+VITE_WHATSAPP_API_URL="https://seu-servidor-whatsapp"
+```
 
 ```bash
 npm run build
@@ -113,3 +121,15 @@ npm run build
 npm run test
 npm run lint
 ```
+
+
+## Checklist de produção (final)
+
+- [ ] `npm install`
+- [ ] `npm run dev`
+- [ ] `npm run build`
+- [ ] `supabase db push`
+- [ ] `supabase functions deploy whatsapp-webhook --no-verify-jwt`
+- [ ] `supabase functions deploy whatsapp-webhook-baileys --no-verify-jwt`
+- [ ] `supabase functions deploy wa-send-message --no-verify-jwt`
+- [ ] Validar rotas: `/app/dashboard`, `/app/inbox`, `/app/leads`, `/app/pipeline`, `/app/agenda`, `/app/whatsapp` e aliases `/crm/*`.

@@ -2,7 +2,20 @@
 // All database access goes through here. Components NEVER import supabase directly.
 
 import { supabase } from "@/integrations/supabase/client";
-import type { Lead, Conversation, Message, PipelineStage, CalendarEvent } from "@/types/crm";
+import type { CalendarEvent, Conversation, Lead, Message, PipelineStage } from "@/types/crm";
+
+type LeadConversationRow = {
+  id: string;
+  organization_id: string;
+  contractor_name: string;
+  stage: string;
+  contact_phone: string | null;
+  whatsapp_phone: string | null;
+  last_message: string | null;
+  last_message_at: string | null;
+  unread_count: number | null;
+  created_at: string;
+};
 
 export async function getCurrentUser() {
   const { data } = await supabase.auth.getUser();
@@ -65,7 +78,9 @@ export async function fetchConversations(orgId: string): Promise<Conversation[]>
 
   if (error) throw error;
 
-  return (data ?? []).map((lead: any) => ({
+  const rows = (data ?? []) as LeadConversationRow[];
+
+  return rows.map((lead) => ({
     id: lead.id,
     organization_id: lead.organization_id,
     lead_id: lead.id,
@@ -76,13 +91,13 @@ export async function fetchConversations(orgId: string): Promise<Conversation[]>
     unread_count: lead.unread_count ?? 0,
     status: "open",
     created_at: lead.created_at,
-    lead,
+    lead: lead as unknown as Lead,
     stage: lead.stage,
   }));
 }
 
-export async function updateConversation(id: string, updates: Partial<Conversation>) {
-  const { error } = await supabase.from("leads").update(updates as any).eq("id", id);
+export async function updateConversation(id: string, updates: Pick<Lead, "stage" | "notes">) {
+  const { error } = await supabase.from("leads").update(updates).eq("id", id);
   if (error) throw error;
 }
 
@@ -152,7 +167,7 @@ export async function fetchEvents(orgId: string): Promise<CalendarEvent[]> {
 }
 
 export async function createEvent(event: Partial<CalendarEvent> & { organization_id: string; title: string; start_time: string; created_by: string }) {
-  const { data, error } = await supabase.from("calendar_events").insert(event as any).select().single();
+  const { data, error } = await supabase.from("calendar_events").insert(event).select().single();
   if (error) throw error;
   return data as CalendarEvent;
 }

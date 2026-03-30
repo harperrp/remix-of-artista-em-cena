@@ -8,6 +8,7 @@ import { useLeads } from "@/hooks/useCrmQueries";
 import { useFunnelStages } from "@/hooks/useFunnelStages";
 import { useAllLeadsFinancials } from "@/hooks/useLeadFinancials";
 import { KanbanFinancialBadge } from "@/components/finance/KanbanFinancialBadge";
+import { buildWhatsAppClickToChatUrl } from "@/services/whatsapp";
 import { StageManagerDialog } from "@/components/leads/StageManagerDialog";
 import { db } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
@@ -421,7 +422,7 @@ export function LeadsKanbanPage() {
                                 {/* WhatsApp Link */}
                                 {lead.contact_phone && (
                                   <a
-                                    href={`https://wa.me/${lead.contact_phone.replace(/\D/g, "")}`}
+                                    href={buildWhatsAppClickToChatUrl(lead.contact_phone) ?? "#"}
                                     target="_blank" rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
                                     className="inline-flex items-center gap-1 text-xs font-medium text-green-600 hover:text-green-700 hover:underline transition-colors"

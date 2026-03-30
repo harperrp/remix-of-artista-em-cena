@@ -81,6 +81,7 @@ export function AppShell() {
   const { role, roleLabel, canViewFinancialTotals, canManageLeads, isArtista } = useUserRole();
   const { isSuperAdmin } = useSuperAdmin();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "Usuário";
 
   const allNavItems = [
     { to: "/app/inbox", icon: MessageSquare, label: "Inbox", roles: ["admin", "comercial", "financeiro", "artista"] },
@@ -113,7 +114,7 @@ export function AppShell() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60">
         <div className="mx-auto flex h-14 w-full max-w-[1440px] items-center justify-between gap-3 px-5 md:px-8">
@@ -124,7 +125,7 @@ export function AppShell() {
             </div>
             <div className="hidden sm:block">
               <div className="text-sm font-semibold tracking-tight flex items-center gap-2">
-                Rodrigo Lopes
+                {displayName}
                 <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-medium">
                   {roleLabel}
                 </Badge>
@@ -231,7 +232,7 @@ export function AppShell() {
       </header>
 
       {/* Main */}
-      <main className="mx-auto w-full max-w-[1440px] px-5 py-6 md:px-8 md:py-8">
+      <main className="mx-auto w-full max-w-[1440px] px-4 py-5 md:px-8 md:py-8">
         <Outlet />
       </main>
     </div>
