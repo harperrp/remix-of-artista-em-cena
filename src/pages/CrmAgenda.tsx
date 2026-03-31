@@ -151,12 +151,19 @@ export function CrmAgendaPage() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const leadId = String(fd.get("lead_id") || "").trim();
+    const linkedLead = leads.find((l: any) => l.id === leadId);
+    const city = String(fd.get("city") || "").trim();
     const data: any = {
       title: fd.get("title"),
       start_time: fd.get("start_time"),
-      city: fd.get("city") || null,
+      city: city || linkedLead?.city || null,
+      state: linkedLead?.state || null,
+      latitude: linkedLead?.latitude || null,
+      longitude: linkedLead?.longitude || null,
+      venue_name: linkedLead?.venue_name || null,
       notes: fd.get("notes") || null,
-      lead_id: fd.get("lead_id") || null,
+      lead_id: leadId || null,
       status: fd.get("status") || "negotiation",
     };
     createMut.mutate(data);
