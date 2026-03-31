@@ -4,13 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx vite",
-    "build": "npx vite build",
-    "build:dev": "npx vite build --mode development",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "npx vite preview",
+    "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "ci": "npm run typecheck && npm run lint && npm run build && npm run test"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.20",
