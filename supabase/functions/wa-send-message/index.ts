@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     const supabase = buildServiceClient();
     const mode = body.mode ?? "cloud";
 
-    let leadId = body.leadId;
+    const leadId = body.leadId;
     let organizationId = body.organizationId;
     let to = normalizePhone(body.to ?? null);
 
