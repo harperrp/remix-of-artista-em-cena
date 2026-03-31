@@ -1,9 +1,10 @@
 import * as React from "react";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 type AuthState = {
   loading: boolean;
-  user: any | null;
+  user: User | null;
 };
 
 const AuthContext = React.createContext<AuthState>({ loading: true, user: null });
@@ -16,8 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setState({ loading: false, user: session?.user ?? null });
     });
 
-    // Load initial session AFTER setting listener
-    supabase.auth.getSession().then(({ data }) => {
+    void supabase.auth.getSession().then(({ data }) => {
       setState({ loading: false, user: data.session?.user ?? null });
     });
 

@@ -58,19 +58,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-
-          brand: {
-            DEFAULT: "hsl(var(--brand))",
-            2: "hsl(var(--brand-2))",
-          },
-
-          status: {
-            free: "hsl(var(--status-free))",
-            negotiation: "hsl(var(--status-negotiation))",
-            confirmed: "hsl(var(--status-confirmed))",
-            blocked: "hsl(var(--status-blocked))",
-            hold: "hsl(var(--status-hold))",
-          },
+        brand: {
+          DEFAULT: "hsl(var(--brand))",
+          2: "hsl(var(--brand-2))",
+        },
+        status: {
+          free: "hsl(var(--status-free))",
+          negotiation: "hsl(var(--status-negotiation))",
+          confirmed: "hsl(var(--status-confirmed))",
+          blocked: "hsl(var(--status-blocked))",
+          hold: "hsl(var(--status-hold))",
+        },
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",

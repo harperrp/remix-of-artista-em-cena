@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
         provider: sendResult.provider,
         provider_message_id: sendResult.providerMessageId,
         status: sendResult.status,
-        endpoint: (sendResult as any).endpoint ?? null,
+        endpoint: "endpoint" in sendResult ? sendResult.endpoint ?? null : null,
       },
     });
 
