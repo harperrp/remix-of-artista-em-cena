@@ -9,6 +9,7 @@ import { User, Phone, MapPin, Send } from "lucide-react";
 import { useOrg } from "@/providers/OrgProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import * as api from "@/services/api";
+import { db } from "@/lib/db";
 import { toast } from "sonner";
 import type { Conversation, PipelineStage } from "@/types/crm";
 import { cn } from "@/lib/utils";
@@ -59,16 +60,68 @@ export function LeadPanel({ conversation, stages }: Props) {
 
   const updateLeadMut = useMutation({
     mutationFn: async () => {
-      if (!leadId) throw new Error("Lead não encontrado");
-      return api.updateLead(leadId, {
+      if (!leadId || !activeOrgId || !user?.id) throw new Error("Lead não encontrado");
+
+      const savedLead = await api.updateLead(leadId, {
         contractor_name: editName.trim() || "Sem nome",
         contact_phone: editPhone.trim() || null,
       });
+
+      const contactName = (editName.trim() || savedLead.contractor_name || conversation.contact_name || "Sem nome").trim();
+      const contactPhone = (editPhone.trim() || savedLead.contact_phone || conversation.contact_phone || "").trim();
+
+      if (!contactName) return savedLead;
+
+      let existingContactId: string | null = null;
+
+      if (contactPhone) {
+        const { data: phoneMatch } = await db
+          .from("contacts")
+          .select("id")
+          .eq("organization_id", activeOrgId)
+          .eq("phone", contactPhone)
+          .limit(1)
+          .maybeSingle();
+        existingContactId = phoneMatch?.id ?? null;
+      }
+
+      if (!existingContactId) {
+        const { data: nameMatch } = await db
+          .from("contacts")
+          .select("id")
+          .eq("organization_id", activeOrgId)
+          .eq("name", contactName)
+          .limit(1)
+          .maybeSingle();
+        existingContactId = nameMatch?.id ?? null;
+      }
+
+      if (existingContactId) {
+        const { error } = await db
+          .from("contacts")
+          .update({
+            name: contactName,
+            phone: contactPhone || null,
+          })
+          .eq("id", existingContactId);
+        if (error) throw error;
+      } else {
+        const { error } = await db.from("contacts").insert({
+          organization_id: activeOrgId,
+          created_by: user.id,
+          name: contactName,
+          phone: contactPhone || null,
+        });
+        if (error) throw error;
+      }
+
+      return savedLead;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["crm-conversations", activeOrgId] });
       qc.invalidateQueries({ queryKey: ["crm-leads"] });
-      toast.success("Contato atualizado");
+      qc.invalidateQueries({ queryKey: ["contacts", activeOrgId] });
+      toast.success("Contato atualizado e sincronizado");
     },
     onError: (e: any) => toast.error(e.message),
   });
