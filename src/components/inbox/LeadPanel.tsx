@@ -14,6 +14,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import * as api from "@/services/api";
 import type { Conversation, Lead, PipelineStage } from "@/types/crm";
 import { cn } from "@/lib/utils";
+import { normalizePhone } from "@/utils/phone";
 
 interface Props {
   conversation: Conversation;
@@ -66,7 +67,8 @@ export function LeadPanel({ conversation, stages }: Props) {
 
   useEffect(() => {
     setEditName(lead?.contractor_name || conversation.contact_name || "");
-    setEditPhone(lead?.contact_phone || conversation.contact_phone || "");
+    // Normalize phone when loading initial state to ensure consistent formatting
+    setEditPhone(normalizePhone(lead?.contact_phone || conversation.contact_phone || ""));
   }, [lead?.id, lead?.contractor_name, lead?.contact_phone, conversation.contact_name, conversation.contact_phone]);
 
   const { data: notes = [] } = useQuery({
@@ -97,7 +99,8 @@ export function LeadPanel({ conversation, stages }: Props) {
       if (!leadId) throw new Error("Lead não encontrado");
       return api.updateLead(leadId, {
         contractor_name: editName.trim() || "Sem nome",
-        contact_phone: editPhone.trim() || null,
+        // Normalize phone before persisting to avoid duplicates due to formatting
+        contact_phone: normalizePhone(editPhone) || null,
       });
     },
     onSuccess: () => {
@@ -132,7 +135,8 @@ export function LeadPanel({ conversation, stages }: Props) {
       leadId,
       title: normaliseAgendaTitle(editName || conversation.contact_name || ""),
       contractorName: editName || conversation.contact_name || "",
-      contactPhone: editPhone || conversation.contact_phone || "",
+      // Normalize phone number before passing to agenda prefill
+      contactPhone: normalizePhone(editPhone || conversation.contact_phone || ""),
       city: lead?.city ?? "",
       state: lead?.state ?? "",
       fee: lead?.fee ?? undefined,
@@ -234,7 +238,11 @@ export function LeadPanel({ conversation, stages }: Props) {
               />
               <Input
                 value={editPhone}
-                onChange={(event) => setEditPhone(event.target.value)}
+                onChange={(event) => {
+                  const rawValue = event.target.value;
+                  // Restrict input to digits only
+                  setEditPhone(rawValue.replace(/[^\d]/g, ""));
+                }}
                 placeholder="Telefone"
                 className="h-8 text-xs"
               />
