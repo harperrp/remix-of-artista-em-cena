@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, KanbanSquare, MapPin, Phone } from "lucide-react";
+import { CalendarDays, KanbanSquare, MapPin, Phone, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -144,7 +144,7 @@ export function CrmInboxPage() {
   };
 
   return (
-    <div className="grid h-full min-h-0 bg-background lg:grid-cols-[16rem_minmax(42rem,48rem)_15rem] lg:justify-center xl:grid-cols-[17rem_minmax(44rem,52rem)_16rem] 2xl:grid-cols-[18rem_minmax(46rem,56rem)_16rem]">
+    <div className="flex h-full min-h-0 bg-background">
       <ConversationList
         conversations={conversations}
         selectedId={selectedId}
@@ -152,10 +152,10 @@ export function CrmInboxPage() {
         onSelect={setSelectedId}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col border-r border-l border-border">
+      <div className="flex min-w-0 flex-1 flex-col">
         {selectedLeadSnapshot && (
           <div className="border-b border-border bg-card px-4 py-2.5">
-            <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate text-sm font-semibold text-foreground">

@@ -65,8 +65,8 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
 
   return (
     <div className="relative flex h-full min-w-0 flex-1 flex-col">
-      <div className="flex h-11 shrink-0 items-center gap-2.5 border-b border-border bg-card px-4">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
+      <div className="flex h-11 items-center border-b border-border bg-card px-4 shrink-0 gap-2.5">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
           <span className="text-[11px] font-semibold text-primary">
             {(conversation.contact_name || conversation.contact_phone || "?")[0].toUpperCase()}
           </span>
@@ -84,7 +84,7 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
         className="flex-1 overflow-y-auto bg-accent/10"
         style={{ scrollBehavior: "auto" }}
       >
-        <div className="mx-auto flex min-h-full w-full max-w-[680px] flex-col justify-end px-4 py-3 pb-2">
+        <div className="mx-auto w-full max-w-[760px] px-4 py-3 pb-2 min-h-full">
           {grouped.map((group) => (
             <div key={group.label}>
               <div className="my-3 flex justify-center">
@@ -102,7 +102,7 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
                 >
                   <div
                     className={cn(
-                      "max-w-[88%] rounded-2xl px-3 py-2 text-sm",
+                      "max-w-[82%] rounded-2xl px-3 py-2 text-sm",
                       msg.direction === "inbound"
                         ? "rounded-bl-md border border-border bg-card text-foreground shadow-card"
                         : "rounded-br-md bg-primary text-primary-foreground shadow-sm"
@@ -134,7 +134,7 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
         </div>
       </div>
 
-      <div className="shrink-0 border-t border-border bg-card px-3 py-2">
+      <div className="border-t border-border bg-card px-3 py-2 shrink-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -143,7 +143,7 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
               setText("");
             }
           }}
-          className="mx-auto flex max-w-[680px] items-center gap-2"
+          className="mx-auto flex max-w-[760px] items-center gap-2"
         >
           <Input
             value={text}

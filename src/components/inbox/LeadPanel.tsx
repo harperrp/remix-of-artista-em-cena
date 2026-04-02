@@ -147,7 +147,7 @@ export function LeadPanel({ conversation, stages }: Props) {
   };
 
   return (
-    <div className="flex h-full min-w-0 flex-col bg-card">
+    <div className="w-[16rem] shrink-0 overflow-auto border-l border-border bg-card xl:w-[17rem]">
       <div className="space-y-3 p-3">
         <Card className="space-y-2 border p-3">
           <div className="flex items-center gap-2">
