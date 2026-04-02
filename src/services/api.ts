@@ -26,20 +26,18 @@ function assertRequiredId(value: string | null | undefined, label: string): stri
   return value;
 }
 
-function mapLeadRowToConversation(lead: LeadConversationRow): Conversation {
+function mapConversationRowToConversation(row: ConversationRow): Conversation {
   return {
-    id: lead.id,
-    organization_id: lead.organization_id,
-    lead_id: lead.id,
-    contact_phone: lead.whatsapp_phone || lead.contact_phone || "",
-    contact_name: lead.contractor_name,
-    last_message_at: lead.last_message_at || lead.created_at,
-    last_message_text: lead.last_message,
-    unread_count: lead.unread_count ?? 0,
-    status: "open",
-    created_at: lead.created_at,
-    lead: lead as unknown as Lead,
-    stage: lead.stage,
+    id: row.id,
+    organization_id: row.organization_id,
+    lead_id: row.lead_id,
+    contact_phone: row.contact_phone,
+    contact_name: row.contact_name,
+    last_message_at: row.last_message_at || row.created_at || "",
+    last_message_text: row.last_message_text,
+    unread_count: row.unread_count ?? 0,
+    status: row.status || "open",
+    created_at: row.created_at || "",
   };
 }
 
