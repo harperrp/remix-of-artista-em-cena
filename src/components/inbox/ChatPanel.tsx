@@ -51,8 +51,8 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
     return (
       <div className="flex flex-1 items-center justify-center bg-accent/20 text-muted-foreground">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/50">
-            <MessageSquare className="h-6 w-6 text-muted-foreground/40" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50">
+            <MessageSquare className="h-7 w-7 text-muted-foreground/40" />
           </div>
           <p className="text-sm font-medium">Selecione uma conversa</p>
           <p className="mt-1 text-xs text-muted-foreground">Escolha um contato à esquerda para começar</p>
@@ -65,9 +65,9 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
 
   return (
     <div className="relative flex h-full min-w-0 flex-1 flex-col">
-      <div className="flex h-12 items-center gap-3 border-b border-border bg-card px-4 shrink-0">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-          <span className="text-xs font-semibold text-primary">
+      <div className="flex h-11 items-center border-b border-border bg-card px-4 shrink-0 gap-2.5">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+          <span className="text-[11px] font-semibold text-primary">
             {(conversation.contact_name || conversation.contact_phone || "?")[0].toUpperCase()}
           </span>
         </div>
@@ -84,11 +84,11 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
         className="flex-1 overflow-y-auto bg-accent/10"
         style={{ scrollBehavior: "auto" }}
       >
-        <div className="flex min-h-full flex-col justify-end p-4 pb-2">
+        <div className="mx-auto w-full max-w-[760px] px-4 py-3 pb-2 min-h-full">
           {grouped.map((group) => (
             <div key={group.label}>
               <div className="my-3 flex justify-center">
-                <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-medium text-muted-foreground">
+                <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
                   {group.label}
                 </span>
               </div>
@@ -102,7 +102,7 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
                 >
                   <div
                     className={cn(
-                      "max-w-[70%] rounded-2xl px-3 py-2 text-sm",
+                      "max-w-[82%] rounded-2xl px-3 py-2 text-sm",
                       msg.direction === "inbound"
                         ? "rounded-bl-md border border-border bg-card text-foreground shadow-card"
                         : "rounded-br-md bg-primary text-primary-foreground shadow-sm"
@@ -134,7 +134,7 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
         </div>
       </div>
 
-      <div className="shrink-0 border-t border-border bg-card px-3 py-2">
+      <div className="border-t border-border bg-card px-3 py-2 shrink-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -143,13 +143,13 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
               setText("");
             }
           }}
-          className="flex items-center gap-2"
+          className="mx-auto flex max-w-[760px] items-center gap-2"
         >
           <Input
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Digite uma mensagem..."
-            className="h-9 flex-1 border-border bg-background"
+            className="h-9 flex-1 border-transparent bg-secondary/50 text-sm focus:border-border"
             autoFocus
           />
           <Button type="submit" size="icon" className="h-9 w-9 shrink-0 rounded-xl" disabled={!text.trim() || sending}>

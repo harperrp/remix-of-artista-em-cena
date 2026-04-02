@@ -24,11 +24,11 @@ const AGENDA_PREFILL_KEY = "crm:agenda-prefill";
 
 const NEXT_STEP_BY_STAGE: Record<string, string> = {
   Prospecção: "Qualificar e puxar resposta útil.",
-  Contato: "Definir interesse, praça e próximo passo.",
-  Proposta: "Registrar proposta e já planejar follow-up.",
-  Negociação: "Levar para agenda e acompanhar no pipeline.",
-  Contrato: "Fechar operação e alinhar evento.",
-  Fechado: "Acompanhar execução e pós-fechamento.",
+  Contato: "Confirmar praça e mover para proposta.",
+  Proposta: "Registrar valor e marcar follow-up.",
+  Negociação: "Virar agenda e próximo compromisso.",
+  Contrato: "Amarrar agenda e fechamento.",
+  Fechado: "Acompanhar operação do show.",
 };
 
 function normaliseAgendaTitle(name: string) {
@@ -110,7 +110,7 @@ export function LeadPanel({ conversation, stages }: Props) {
   });
 
   const nextRecommendedAction = useMemo(() => {
-    return NEXT_STEP_BY_STAGE[leadStage] ?? "Mover o lead com rapidez e registrar contexto.";
+    return NEXT_STEP_BY_STAGE[leadStage] ?? "Qualifique, mova etapa e conecte com agenda.";
   }, [leadStage]);
 
   const handleStageChange = async (stageName: string) => {
@@ -147,9 +147,9 @@ export function LeadPanel({ conversation, stages }: Props) {
   };
 
   return (
-    <div className="w-[17.5rem] shrink-0 overflow-auto border-l border-border bg-card">
+    <div className="w-[16rem] shrink-0 overflow-auto border-l border-border bg-card xl:w-[17rem]">
       <div className="space-y-3 p-3">
-        <Card className="space-y-3 p-3">
+        <Card className="space-y-2 border p-3">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
               <User className="h-4 w-4 text-primary" />
@@ -158,26 +158,24 @@ export function LeadPanel({ conversation, stages }: Props) {
               <p className="truncate text-sm font-semibold text-foreground">
                 {conversation.contact_name || editName || "Sem nome"}
               </p>
-              <p className="truncate text-[11px] text-muted-foreground">
-                {conversation.contact_phone}
-              </p>
+              <p className="truncate text-[11px] text-muted-foreground">{conversation.contact_phone}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-[11px]">
-            <div className="rounded-lg border border-border px-2.5 py-2">
+            <div className="rounded-lg border px-2.5 py-2">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Etapa</p>
               <p className="mt-1 font-medium text-foreground">{leadStage}</p>
             </div>
-            <div className="rounded-lg border border-border px-2.5 py-2">
+            <div className="rounded-lg border px-2.5 py-2">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Último toque</p>
               <p className="mt-1 font-medium text-foreground">{formatDateLabel(conversation.last_message_at)}</p>
             </div>
-            <div className="rounded-lg border border-border px-2.5 py-2">
+            <div className="rounded-lg border px-2.5 py-2">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Origem</p>
               <p className="mt-1 font-medium text-foreground">{lead?.origin || "WhatsApp"}</p>
             </div>
-            <div className="rounded-lg border border-border px-2.5 py-2">
+            <div className="rounded-lg border px-2.5 py-2">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Local</p>
               <p className="mt-1 font-medium text-foreground">{locationLabel || "Definir cidade/UF"}</p>
             </div>
@@ -189,35 +187,30 @@ export function LeadPanel({ conversation, stages }: Props) {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Button size="sm" className="h-8 justify-start gap-2" onClick={handleGoToAgenda}>
-              <CalendarDays className="h-4 w-4" />
+            <Button size="sm" className="h-8 justify-start gap-2 text-xs" onClick={handleGoToAgenda}>
+              <CalendarDays className="h-3.5 w-3.5" />
               Agenda
             </Button>
-            <Button size="sm" variant="outline" className="h-8 justify-start gap-2" onClick={() => navigate("/app/pipeline")}>
-              <KanbanSquare className="h-4 w-4" />
+            <Button size="sm" variant="outline" className="h-8 justify-start gap-2 text-xs" onClick={() => navigate("/app/pipeline")}>
+              <KanbanSquare className="h-3.5 w-3.5" />
               Pipeline
             </Button>
-            <Button size="sm" variant="outline" className="h-8 justify-start gap-2" onClick={() => navigate("/app/map")}>
-              <MapPin className="h-4 w-4" />
+            <Button size="sm" variant="outline" className="h-8 justify-start gap-2 text-xs" onClick={() => navigate("/app/map")}>
+              <MapPin className="h-3.5 w-3.5" />
               Mapa
             </Button>
-            <Button size="sm" variant="outline" className="h-8 justify-start gap-2" onClick={() => navigate("/app/contacts")}>
-              <Users className="h-4 w-4" />
+            <Button size="sm" variant="outline" className="h-8 justify-start gap-2 text-xs" onClick={() => navigate("/app/contacts")}>
+              <Users className="h-3.5 w-3.5" />
               Contatos
             </Button>
           </div>
         </Card>
 
         {lead && (
-          <Card className="space-y-2.5 p-3">
+          <Card className="space-y-2 border p-3">
             <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Cadastro rápido</p>
-                <p className="text-sm font-semibold text-foreground">{lead.contractor_name}</p>
-              </div>
-              <Badge variant="secondary" className="text-[10px] font-medium">
-                {leadStage}
-              </Badge>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Cadastro rápido</p>
+              <Badge variant="secondary" className="text-[10px] font-medium">{leadStage}</Badge>
             </div>
 
             {lead.contact_phone && (
@@ -236,22 +229,16 @@ export function LeadPanel({ conversation, stages }: Props) {
               <Input
                 value={editName}
                 onChange={(event) => setEditName(event.target.value)}
-                placeholder="Nome do cliente"
+                placeholder="Nome"
                 className="h-8 text-xs"
               />
               <Input
                 value={editPhone}
                 onChange={(event) => setEditPhone(event.target.value)}
-                placeholder="Telefone do cliente"
+                placeholder="Telefone"
                 className="h-8 text-xs"
               />
-              <Button
-                type="submit"
-                size="sm"
-                variant="outline"
-                className="h-8 w-full text-xs"
-                disabled={updateLeadMut.isPending}
-              >
+              <Button type="submit" size="sm" variant="outline" className="h-8 w-full text-xs" disabled={updateLeadMut.isPending}>
                 Salvar contato
               </Button>
             </form>
@@ -259,10 +246,10 @@ export function LeadPanel({ conversation, stages }: Props) {
         )}
 
         {lead && stages.length > 0 && (
-          <Card className="space-y-2.5 p-3">
+          <Card className="space-y-2 border p-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Mover etapa</p>
-              <span className="text-[10px] text-muted-foreground">funil</span>
+              <p className="text-[10px] text-muted-foreground">funil</p>
             </div>
 
             <div className="flex flex-wrap gap-1.5">
@@ -271,7 +258,7 @@ export function LeadPanel({ conversation, stages }: Props) {
                   key={stage.id}
                   onClick={() => handleStageChange(stage.name)}
                   className={cn(
-                    "rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-all duration-150",
+                    "rounded-lg border px-2 py-1 text-[11px] font-medium transition-all duration-150",
                     leadStage === stage.name
                       ? "border-primary bg-primary text-primary-foreground shadow-sm"
                       : "border-border text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -285,7 +272,7 @@ export function LeadPanel({ conversation, stages }: Props) {
         )}
 
         {leadId && (
-          <Card className="space-y-2.5 p-3">
+          <Card className="space-y-2 border p-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Notas</p>
               <span className="text-[10px] text-muted-foreground">contexto rápido</span>
@@ -305,21 +292,15 @@ export function LeadPanel({ conversation, stages }: Props) {
                 placeholder="Praça, valor, objeção, disponibilidade..."
                 className="min-h-[76px] resize-none text-xs"
               />
-              <Button
-                type="submit"
-                size="sm"
-                variant="secondary"
-                className="h-8 w-full gap-2 text-xs"
-                disabled={!noteText.trim() || noteMut.isPending}
-              >
+              <Button type="submit" size="sm" variant="secondary" className="h-8 w-full gap-2 text-xs" disabled={!noteText.trim() || noteMut.isPending}>
                 <Send className="h-3.5 w-3.5" />
                 Salvar nota
               </Button>
             </form>
 
             {notes.length > 0 && (
-              <div className="space-y-2">
-                {notes.slice(0, 3).map((note) => (
+              <div className="space-y-2 pt-1">
+                {notes.slice(0, 2).map((note) => (
                   <Card key={note.id} className="border bg-background p-2.5">
                     <p className="text-xs leading-relaxed text-foreground">{note.content}</p>
                     <p className="mt-1.5 text-[10px] text-muted-foreground">

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, KanbanSquare, MapPin, Phone } from "lucide-react";
+import { CalendarDays, KanbanSquare, MapPin, Phone, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -153,8 +153,8 @@ export function CrmInboxPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {selectedLeadSnapshot ? (
-          <div className="border-b border-border bg-card/70 px-4 py-2 backdrop-blur-sm">
+        {selectedLeadSnapshot && (
+          <div className="border-b border-border bg-card px-4 py-2.5">
             <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
@@ -177,15 +177,13 @@ export function CrmInboxPage() {
                     {selectedLeadSnapshot.phone}
                   </span>
                   <span>Último toque: {selectedLeadSnapshot.lastTouch}</span>
-                  {selectedLeadSnapshot.location && (
-                    <span>{selectedLeadSnapshot.location}</span>
-                  )}
+                  {selectedLeadSnapshot.location && <span>{selectedLeadSnapshot.location}</span>}
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 lg:justify-end">
+              <div className="flex flex-wrap gap-2">
                 <Button size="sm" className="h-8 gap-2" onClick={handleAgendaShortcut}>
-                  <CalendarDays className="h-4 w-4" />
+                  <CalendarDays className="h-3.5 w-3.5" />
                   Agenda
                 </Button>
                 <Button
@@ -194,7 +192,7 @@ export function CrmInboxPage() {
                   className="h-8 gap-2"
                   onClick={() => (window.location.href = "/app/pipeline")}
                 >
-                  <KanbanSquare className="h-4 w-4" />
+                  <KanbanSquare className="h-3.5 w-3.5" />
                   Pipeline
                 </Button>
                 <Button
@@ -203,15 +201,11 @@ export function CrmInboxPage() {
                   className="h-8 gap-2"
                   onClick={() => (window.location.href = "/app/map")}
                 >
-                  <MapPin className="h-4 w-4" />
+                  <MapPin className="h-3.5 w-3.5" />
                   Mapa
                 </Button>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="border-b border-border bg-card/70 px-4 py-2 text-sm text-muted-foreground">
-            Selecione uma conversa para trabalhar o funil.
           </div>
         )}
 
