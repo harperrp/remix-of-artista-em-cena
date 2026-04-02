@@ -42,30 +42,30 @@ function mapConversationRowToConversation(row: ConversationRow): Conversation {
   };
 }
 
-function mapConversationUpdatesToLeadUpdates(updates: Partial<Conversation>): LeadUpdate {
-  const leadUpdates: LeadUpdate = {};
+function mapConversationUpdates(updates: Partial<Conversation>): ConversationUpdate {
+  const convUpdates: ConversationUpdate = {};
 
   if (updates.last_message_text !== undefined) {
-    leadUpdates.last_message = updates.last_message_text;
+    convUpdates.last_message_text = updates.last_message_text;
   }
 
   if (updates.last_message_at !== undefined) {
-    leadUpdates.last_message_at = updates.last_message_at;
+    convUpdates.last_message_at = updates.last_message_at;
   }
 
   if (updates.unread_count !== undefined) {
-    leadUpdates.unread_count = updates.unread_count;
+    convUpdates.unread_count = updates.unread_count;
   }
 
   if (updates.contact_phone !== undefined) {
-    leadUpdates.contact_phone = updates.contact_phone;
+    convUpdates.contact_phone = updates.contact_phone;
   }
 
-  if (updates.stage !== undefined) {
-    leadUpdates.stage = updates.stage;
+  if (updates.status !== undefined) {
+    convUpdates.status = updates.status;
   }
 
-  return leadUpdates;
+  return convUpdates;
 }
 
 export async function getCurrentUser() {
