@@ -159,20 +159,23 @@ export async function fetchConversations(orgId: string): Promise<Conversation[]>
 }
 
 export async function updateConversation(id: string, updates: Partial<Conversation>) {
-  const requiredLeadId = assertRequiredId(id, "lead_id");
-  const leadUpdates = mapConversationUpdatesToLeadUpdates(updates);
+  const requiredId = assertRequiredId(id, "conversation_id");
+  const convUpdates = mapConversationUpdates(updates);
 
-  if (Object.keys(leadUpdates).length === 0) {
+  if (Object.keys(convUpdates).length === 0) {
     return;
   }
 
-  const { error } = await supabase.from("leads").update(leadUpdates).eq("id", requiredLeadId);
+  const { error } = await supabase.from("conversations").update(convUpdates).eq("id", requiredId);
   if (error) throw error;
 }
 
-export async function markConversationRead(leadId: string) {
-  const requiredLeadId = assertRequiredId(leadId, "lead_id");
-  const { error } = await supabase.rpc("mark_lead_conversation_read", { _lead_id: requiredLeadId });
+export async function markConversationRead(conversationId: string) {
+  const requiredId = assertRequiredId(conversationId, "conversation_id");
+  const { error } = await supabase
+    .from("conversations")
+    .update({ unread_count: 0 })
+    .eq("id", requiredId);
   if (error) throw error;
 }
 
