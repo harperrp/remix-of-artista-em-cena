@@ -9,6 +9,7 @@ type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 type LeadRow = Database["public"]["Tables"]["leads"]["Row"];
 type LeadInsert = Database["public"]["Tables"]["leads"]["Insert"];
 type LeadUpdate = Database["public"]["Tables"]["leads"]["Update"];
+type ConversationUpdate = Database["public"]["Tables"]["conversations"]["Update"];
 type FunnelStageRow = Database["public"]["Tables"]["funnel_stages"]["Row"];
 type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
 type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
@@ -16,19 +17,7 @@ type LeadMessageRow = Database["public"]["Tables"]["lead_messages"]["Row"];
 type CalendarEventRow = Database["public"]["Tables"]["calendar_events"]["Row"];
 type CalendarEventInsert = Database["public"]["Tables"]["calendar_events"]["Insert"];
 
-type LeadConversationRow = Pick<
-  LeadRow,
-  | "id"
-  | "organization_id"
-  | "contractor_name"
-  | "stage"
-  | "contact_phone"
-  | "whatsapp_phone"
-  | "last_message"
-  | "last_message_at"
-  | "unread_count"
-  | "created_at"
->;
+type ConversationRow = Database["public"]["Tables"]["conversations"]["Row"];
 
 function assertRequiredId(value: string | null | undefined, label: string): string {
   if (!value) {
@@ -38,47 +27,45 @@ function assertRequiredId(value: string | null | undefined, label: string): stri
   return value;
 }
 
-function mapLeadRowToConversation(lead: LeadConversationRow): Conversation {
+function mapConversationRowToConversation(row: ConversationRow): Conversation {
   return {
-    id: lead.id,
-    organization_id: lead.organization_id,
-    lead_id: lead.id,
-    contact_phone: lead.whatsapp_phone || lead.contact_phone || "",
-    contact_name: lead.contractor_name,
-    last_message_at: lead.last_message_at || lead.created_at,
-    last_message_text: lead.last_message,
-    unread_count: lead.unread_count ?? 0,
-    status: "open",
-    created_at: lead.created_at,
-    lead: lead as unknown as Lead,
-    stage: lead.stage,
+    id: row.id,
+    organization_id: row.organization_id,
+    lead_id: row.lead_id,
+    contact_phone: row.contact_phone,
+    contact_name: row.contact_name,
+    last_message_at: row.last_message_at || row.created_at || "",
+    last_message_text: row.last_message_text,
+    unread_count: row.unread_count ?? 0,
+    status: row.status || "open",
+    created_at: row.created_at || "",
   };
 }
 
-function mapConversationUpdatesToLeadUpdates(updates: Partial<Conversation>): LeadUpdate {
-  const leadUpdates: LeadUpdate = {};
+function mapConversationUpdates(updates: Partial<Conversation>): ConversationUpdate {
+  const convUpdates: ConversationUpdate = {};
 
   if (updates.last_message_text !== undefined) {
-    leadUpdates.last_message = updates.last_message_text;
+    convUpdates.last_message_text = updates.last_message_text;
   }
 
   if (updates.last_message_at !== undefined) {
-    leadUpdates.last_message_at = updates.last_message_at;
+    convUpdates.last_message_at = updates.last_message_at;
   }
 
   if (updates.unread_count !== undefined) {
-    leadUpdates.unread_count = updates.unread_count;
+    convUpdates.unread_count = updates.unread_count;
   }
 
   if (updates.contact_phone !== undefined) {
-    leadUpdates.contact_phone = updates.contact_phone;
+    convUpdates.contact_phone = updates.contact_phone;
   }
 
-  if (updates.stage !== undefined) {
-    leadUpdates.stage = updates.stage;
+  if (updates.status !== undefined) {
+    convUpdates.status = updates.status;
   }
 
-  return leadUpdates;
+  return convUpdates;
 }
 
 export async function getCurrentUser() {
@@ -161,31 +148,34 @@ export async function fetchConversations(orgId: string): Promise<Conversation[]>
   const requiredOrgId = assertRequiredId(orgId, "organization_id");
 
   const { data, error } = await supabase
-    .from("leads")
-    .select("id, organization_id, contractor_name, stage, contact_phone, whatsapp_phone, last_message, last_message_at, unread_count, created_at")
+    .from("conversations")
+    .select("*")
     .eq("organization_id", requiredOrgId)
     .order("last_message_at", { ascending: false, nullsFirst: false });
 
   if (error) throw error;
 
-  return ((data ?? []) as LeadConversationRow[]).map(mapLeadRowToConversation);
+  return ((data ?? []) as ConversationRow[]).map(mapConversationRowToConversation);
 }
 
 export async function updateConversation(id: string, updates: Partial<Conversation>) {
-  const requiredLeadId = assertRequiredId(id, "lead_id");
-  const leadUpdates = mapConversationUpdatesToLeadUpdates(updates);
+  const requiredId = assertRequiredId(id, "conversation_id");
+  const convUpdates = mapConversationUpdates(updates);
 
-  if (Object.keys(leadUpdates).length === 0) {
+  if (Object.keys(convUpdates).length === 0) {
     return;
   }
 
-  const { error } = await supabase.from("leads").update(leadUpdates).eq("id", requiredLeadId);
+  const { error } = await supabase.from("conversations").update(convUpdates).eq("id", requiredId);
   if (error) throw error;
 }
 
-export async function markConversationRead(leadId: string) {
-  const requiredLeadId = assertRequiredId(leadId, "lead_id");
-  const { error } = await supabase.rpc("mark_lead_conversation_read", { _lead_id: requiredLeadId });
+export async function markConversationRead(conversationId: string) {
+  const requiredId = assertRequiredId(conversationId, "conversation_id");
+  const { error } = await supabase
+    .from("conversations")
+    .update({ unread_count: 0 })
+    .eq("id", requiredId);
   if (error) throw error;
 }
 
