@@ -148,14 +148,14 @@ export async function fetchConversations(orgId: string): Promise<Conversation[]>
   const requiredOrgId = assertRequiredId(orgId, "organization_id");
 
   const { data, error } = await supabase
-    .from("leads")
-    .select("id, organization_id, contractor_name, stage, contact_phone, whatsapp_phone, last_message, last_message_at, unread_count, created_at")
+    .from("conversations")
+    .select("*")
     .eq("organization_id", requiredOrgId)
     .order("last_message_at", { ascending: false, nullsFirst: false });
 
   if (error) throw error;
 
-  return ((data ?? []) as LeadConversationRow[]).map(mapLeadRowToConversation);
+  return ((data ?? []) as ConversationRow[]).map(mapConversationRowToConversation);
 }
 
 export async function updateConversation(id: string, updates: Partial<Conversation>) {
