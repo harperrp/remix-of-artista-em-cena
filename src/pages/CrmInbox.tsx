@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, KanbanSquare, MapPin, MessageSquare, Radio, Target } from "lucide-react";
+import { CalendarDays, KanbanSquare, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -62,26 +62,6 @@ export function CrmInboxPage() {
     queryFn: () => api.fetchStages(activeOrgId!),
     enabled: !!activeOrgId,
   });
-
-  const inboxSummary = useMemo(() => {
-    const unreadConversations = conversations.filter((conversation) => (conversation.unread_count ?? 0) > 0).length;
-    const totalUnreadMessages = conversations.reduce((total, conversation) => total + (conversation.unread_count ?? 0), 0);
-    const activeStageLabel = selected?.stage ?? selected?.lead?.stage ?? "Sem etapa";
-    const stageLoad = stages
-      .map((stage) => ({
-        name: stage.name,
-        total: conversations.filter((conversation) => (conversation.stage ?? conversation.lead?.stage) === stage.name).length,
-      }))
-      .filter((stage) => stage.total > 0)
-      .slice(0, 3);
-
-    return {
-      unreadConversations,
-      totalUnreadMessages,
-      activeStageLabel,
-      stageLoad,
-    };
-  }, [conversations, selected, stages]);
 
   const selectedLeadSnapshot = useMemo(() => {
     if (!selected) return null;
@@ -173,97 +153,45 @@ export function CrmInboxPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="border-b border-border bg-card/70 px-5 py-3 backdrop-blur-sm">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-              <div>
-                <p className="text-sm font-semibold text-foreground">Inbox comercial</p>
-                <p className="text-xs text-muted-foreground">
-                  Aqui começa o funil. Qualifique o contato, mova etapa, registre contexto e puxe agenda, mapa e pipeline sem sair da conversa.
-                </p>
+        {selectedLeadSnapshot && (
+          <div className="border-b border-border bg-card/80 px-4 py-3 backdrop-blur-sm">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="truncate text-sm font-semibold text-foreground">{selectedLeadSnapshot.name}</p>
+                  <Badge variant="secondary" className="text-[10px] font-medium">
+                    {selectedLeadSnapshot.stage}
+                  </Badge>
+                  {selectedLeadSnapshot.unread > 0 && (
+                    <Badge variant="outline" className="text-[10px] font-medium text-primary">
+                      {selectedLeadSnapshot.unread} não lidas
+                    </Badge>
+                  )}
+                </div>
+                <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+                  <span>{selectedLeadSnapshot.phone}</span>
+                  <span>Último toque: {selectedLeadSnapshot.lastTouch}</span>
+                  {selectedLeadSnapshot.location && <span>{selectedLeadSnapshot.location}</span>}
+                </div>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-3">
-                <div className="rounded-xl border border-border bg-background px-3 py-2">
-                  <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    Conversas não lidas
-                  </div>
-                  <p className="mt-1 text-lg font-semibold text-foreground">{inboxSummary.unreadConversations}</p>
-                </div>
-
-                <div className="rounded-xl border border-border bg-background px-3 py-2">
-                  <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    <Radio className="h-3.5 w-3.5" />
-                    Mensagens pendentes
-                  </div>
-                  <p className="mt-1 text-lg font-semibold text-foreground">{inboxSummary.totalUnreadMessages}</p>
-                </div>
-
-                <div className="rounded-xl border border-border bg-background px-3 py-2">
-                  <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    <Target className="h-3.5 w-3.5" />
-                    Etapa atual
-                  </div>
-                  <p className="mt-1 truncate text-sm font-semibold text-foreground">{selected ? inboxSummary.activeStageLabel : "Selecione um lead"}</p>
-                </div>
+              <div className="grid grid-cols-3 gap-2 xl:w-auto">
+                <Button size="sm" className="gap-2" onClick={handleAgendaShortcut}>
+                  <CalendarDays className="h-4 w-4" />
+                  Agenda
+                </Button>
+                <Button size="sm" variant="outline" className="gap-2" onClick={() => (window.location.href = "/app/pipeline")}>
+                  <KanbanSquare className="h-4 w-4" />
+                  Pipeline
+                </Button>
+                <Button size="sm" variant="outline" className="gap-2" onClick={() => (window.location.href = "/app/map")}>
+                  <MapPin className="h-4 w-4" />
+                  Mapa
+                </Button>
               </div>
             </div>
-
-            {selectedLeadSnapshot && (
-              <div className="rounded-2xl border border-border bg-background px-4 py-3">
-                <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-foreground">{selectedLeadSnapshot.name}</p>
-                      <Badge variant="secondary" className="text-[10px] font-medium">
-                        {selectedLeadSnapshot.stage}
-                      </Badge>
-                      {selectedLeadSnapshot.unread > 0 && (
-                        <Badge variant="outline" className="text-[10px] font-medium text-primary">
-                          {selectedLeadSnapshot.unread} não lidas
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      <span>{selectedLeadSnapshot.phone}</span>
-                      <span>Último toque: {selectedLeadSnapshot.lastTouch}</span>
-                      {selectedLeadSnapshot.location && <span>{selectedLeadSnapshot.location}</span>}
-                    </div>
-                    {!!inboxSummary.stageLoad.length && (
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {inboxSummary.stageLoad.map((stage) => (
-                          <span key={stage.name} className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
-                            {stage.name}: {stage.total}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="grid gap-2 sm:grid-cols-4 xl:min-w-[33rem]">
-                    <Button size="sm" className="justify-start gap-2" onClick={handleAgendaShortcut}>
-                      <CalendarDays className="h-4 w-4" />
-                      Agenda
-                    </Button>
-                    <Button size="sm" variant="outline" className="justify-start gap-2" onClick={() => (window.location.href = "/app/pipeline")}>
-                      <KanbanSquare className="h-4 w-4" />
-                      Pipeline
-                    </Button>
-                    <Button size="sm" variant="outline" className="justify-start gap-2" onClick={() => (window.location.href = "/app/map")}>
-                      <MapPin className="h-4 w-4" />
-                      Mapa
-                    </Button>
-                    <Button size="sm" variant="outline" className="justify-start gap-2" onClick={() => (window.location.href = "/app/leads")}>
-                      <Target className="h-4 w-4" />
-                      Carteira
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+        )}
 
         <ChatPanel
           conversation={selected}
