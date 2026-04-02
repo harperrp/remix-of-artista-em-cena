@@ -9,6 +9,7 @@ type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 type LeadRow = Database["public"]["Tables"]["leads"]["Row"];
 type LeadInsert = Database["public"]["Tables"]["leads"]["Insert"];
 type LeadUpdate = Database["public"]["Tables"]["leads"]["Update"];
+type ConversationUpdate = Database["public"]["Tables"]["conversations"]["Update"];
 type FunnelStageRow = Database["public"]["Tables"]["funnel_stages"]["Row"];
 type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
 type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
