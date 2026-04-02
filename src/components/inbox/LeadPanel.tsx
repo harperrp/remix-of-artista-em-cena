@@ -24,11 +24,11 @@ const AGENDA_PREFILL_KEY = "crm:agenda-prefill";
 
 const NEXT_STEP_BY_STAGE: Record<string, string> = {
   Prospecção: "Qualificar e puxar resposta útil.",
-  Contato: "Definir interesse e próximo passo.",
-  Proposta: "Registrar valor e preparar follow-up.",
-  Negociação: "Virar evento na agenda.",
-  Contrato: "Conectar agenda e contrato.",
-  Fechado: "Acompanhar operação do show.",
+  Contato: "Definir interesse, praça e próximo passo.",
+  Proposta: "Registrar proposta e já planejar follow-up.",
+  Negociação: "Levar para agenda e acompanhar no pipeline.",
+  Contrato: "Fechar operação e alinhar evento.",
+  Fechado: "Acompanhar execução e pós-fechamento.",
 };
 
 function normaliseAgendaTitle(name: string) {
@@ -110,7 +110,7 @@ export function LeadPanel({ conversation, stages }: Props) {
   });
 
   const nextRecommendedAction = useMemo(() => {
-    return NEXT_STEP_BY_STAGE[leadStage] ?? "Qualifique o lead e empurre o próximo passo para agenda ou pipeline.";
+    return NEXT_STEP_BY_STAGE[leadStage] ?? "Mover o lead com rapidez e registrar contexto.";
   }, [leadStage]);
 
   const handleStageChange = async (stageName: string) => {
@@ -147,59 +147,61 @@ export function LeadPanel({ conversation, stages }: Props) {
   };
 
   return (
-    <div className="w-[21rem] shrink-0 overflow-auto border-l border-border bg-card">
-      <div className="space-y-4 p-4">
-        <Card className="space-y-3 border bg-background p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <User className="h-4.5 w-4.5 text-primary" />
+    <div className="w-[17.5rem] shrink-0 overflow-auto border-l border-border bg-card">
+      <div className="space-y-3 p-3">
+        <Card className="space-y-3 p-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+              <User className="h-4 w-4 text-primary" />
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-foreground">
                 {conversation.contact_name || editName || "Sem nome"}
               </p>
-              <p className="text-xs text-muted-foreground">{conversation.contact_phone}</p>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {conversation.contact_phone}
+              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="rounded-lg border border-border px-3 py-2">
+          <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <div className="rounded-lg border border-border px-2.5 py-2">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Etapa</p>
               <p className="mt-1 font-medium text-foreground">{leadStage}</p>
             </div>
-            <div className="rounded-lg border border-border px-3 py-2">
+            <div className="rounded-lg border border-border px-2.5 py-2">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Último toque</p>
               <p className="mt-1 font-medium text-foreground">{formatDateLabel(conversation.last_message_at)}</p>
             </div>
-            <div className="rounded-lg border border-border px-3 py-2">
+            <div className="rounded-lg border border-border px-2.5 py-2">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Origem</p>
               <p className="mt-1 font-medium text-foreground">{lead?.origin || "WhatsApp"}</p>
             </div>
-            <div className="rounded-lg border border-border px-3 py-2">
+            <div className="rounded-lg border border-border px-2.5 py-2">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Local</p>
               <p className="mt-1 font-medium text-foreground">{locationLabel || "Definir cidade/UF"}</p>
             </div>
           </div>
 
-          <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+          <div className="rounded-lg border border-primary/20 bg-primary/5 px-2.5 py-2">
             <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Próximo passo</p>
             <p className="mt-1 text-sm font-medium text-foreground">{nextRecommendedAction}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Button size="sm" className="justify-start gap-2" onClick={handleGoToAgenda}>
+            <Button size="sm" className="h-8 justify-start gap-2" onClick={handleGoToAgenda}>
               <CalendarDays className="h-4 w-4" />
               Agenda
             </Button>
-            <Button size="sm" variant="outline" className="justify-start gap-2" onClick={() => navigate("/app/pipeline")}>
+            <Button size="sm" variant="outline" className="h-8 justify-start gap-2" onClick={() => navigate("/app/pipeline")}>
               <KanbanSquare className="h-4 w-4" />
               Pipeline
             </Button>
-            <Button size="sm" variant="outline" className="justify-start gap-2" onClick={() => navigate("/app/map")}>
+            <Button size="sm" variant="outline" className="h-8 justify-start gap-2" onClick={() => navigate("/app/map")}>
               <MapPin className="h-4 w-4" />
               Mapa
             </Button>
-            <Button size="sm" variant="outline" className="justify-start gap-2" onClick={() => navigate("/app/contacts")}>
+            <Button size="sm" variant="outline" className="h-8 justify-start gap-2" onClick={() => navigate("/app/contacts")}>
               <Users className="h-4 w-4" />
               Contatos
             </Button>
@@ -207,8 +209,8 @@ export function LeadPanel({ conversation, stages }: Props) {
         </Card>
 
         {lead && (
-          <Card className="space-y-2.5 border p-4">
-            <div className="flex items-start justify-between gap-3">
+          <Card className="space-y-2.5 p-3">
+            <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Cadastro rápido</p>
                 <p className="text-sm font-semibold text-foreground">{lead.contractor_name}</p>
@@ -217,13 +219,15 @@ export function LeadPanel({ conversation, stages }: Props) {
                 {leadStage}
               </Badge>
             </div>
+
             {lead.contact_phone && (
-              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <Phone className="h-3 w-3" /> {lead.contact_phone}
               </p>
             )}
+
             <form
-              className="space-y-2 pt-2"
+              className="space-y-2"
               onSubmit={(event) => {
                 event.preventDefault();
                 updateLeadMut.mutate();
@@ -245,7 +249,7 @@ export function LeadPanel({ conversation, stages }: Props) {
                 type="submit"
                 size="sm"
                 variant="outline"
-                className="w-full text-xs"
+                className="h-8 w-full text-xs"
                 disabled={updateLeadMut.isPending}
               >
                 Salvar contato
@@ -255,11 +259,12 @@ export function LeadPanel({ conversation, stages }: Props) {
         )}
 
         {lead && stages.length > 0 && (
-          <Card className="space-y-3 border p-4">
+          <Card className="space-y-2.5 p-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Mover etapa</p>
-              <p className="text-[11px] text-muted-foreground">funil</p>
+              <span className="text-[10px] text-muted-foreground">funil</span>
             </div>
+
             <div className="flex flex-wrap gap-1.5">
               {stages.map((stage) => (
                 <button
@@ -280,11 +285,12 @@ export function LeadPanel({ conversation, stages }: Props) {
         )}
 
         {leadId && (
-          <Card className="space-y-3 border p-4">
+          <Card className="space-y-2.5 p-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Notas</p>
-              <span className="text-[11px] text-muted-foreground">contexto rápido</span>
+              <span className="text-[10px] text-muted-foreground">contexto rápido</span>
             </div>
+
             <form
               onSubmit={(event) => {
                 event.preventDefault();
@@ -297,9 +303,15 @@ export function LeadPanel({ conversation, stages }: Props) {
                 value={noteText}
                 onChange={(event) => setNoteText(event.target.value)}
                 placeholder="Praça, valor, objeção, disponibilidade..."
-                className="min-h-[88px] resize-none text-xs"
+                className="min-h-[76px] resize-none text-xs"
               />
-              <Button type="submit" size="sm" variant="secondary" className="w-full gap-2 text-xs" disabled={!noteText.trim() || noteMut.isPending}>
+              <Button
+                type="submit"
+                size="sm"
+                variant="secondary"
+                className="h-8 w-full gap-2 text-xs"
+                disabled={!noteText.trim() || noteMut.isPending}
+              >
                 <Send className="h-3.5 w-3.5" />
                 Salvar nota
               </Button>
@@ -308,9 +320,9 @@ export function LeadPanel({ conversation, stages }: Props) {
             {notes.length > 0 && (
               <div className="space-y-2">
                 {notes.slice(0, 3).map((note) => (
-                  <Card key={note.id} className="border bg-background p-3">
+                  <Card key={note.id} className="border bg-background p-2.5">
                     <p className="text-xs leading-relaxed text-foreground">{note.content}</p>
-                    <p className="mt-2 text-[10px] text-muted-foreground">
+                    <p className="mt-1.5 text-[10px] text-muted-foreground">
                       {new Date(note.created_at).toLocaleString("pt-BR")}
                     </p>
                   </Card>

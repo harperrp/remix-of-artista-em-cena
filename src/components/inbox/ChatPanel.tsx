@@ -49,13 +49,13 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
 
   if (!conversation) {
     return (
-      <div className="flex-1 flex items-center justify-center text-muted-foreground bg-accent/20">
+      <div className="flex flex-1 items-center justify-center bg-accent/20 text-muted-foreground">
         <div className="text-center">
-          <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-            <MessageSquare className="h-7 w-7 text-muted-foreground/40" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/50">
+            <MessageSquare className="h-6 w-6 text-muted-foreground/40" />
           </div>
           <p className="text-sm font-medium">Selecione uma conversa</p>
-          <p className="text-xs text-muted-foreground mt-1">Escolha um contato à esquerda para começar</p>
+          <p className="mt-1 text-xs text-muted-foreground">Escolha um contato à esquerda para começar</p>
         </div>
       </div>
     );
@@ -64,33 +64,31 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
   const grouped = groupByDate(messages);
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 h-full relative">
-      {/* Header */}
-      <div className="h-14 flex items-center px-5 border-b border-border bg-card shrink-0 z-10 gap-3">
-        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+    <div className="relative flex h-full min-w-0 flex-1 flex-col">
+      <div className="flex h-12 items-center gap-3 border-b border-border bg-card px-4 shrink-0">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
           <span className="text-xs font-semibold text-primary">
             {(conversation.contact_name || conversation.contact_phone || "?")[0].toUpperCase()}
           </span>
         </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-foreground">
             {conversation.contact_name || conversation.contact_phone}
           </p>
           <p className="text-[10px] text-muted-foreground">{conversation.contact_phone}</p>
         </div>
       </div>
 
-      {/* Messages */}
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto bg-accent/10"
         style={{ scrollBehavior: "auto" }}
       >
-        <div className="p-5 pb-2 min-h-full flex flex-col justify-end">
+        <div className="flex min-h-full flex-col justify-end p-4 pb-2">
           {grouped.map((group) => (
             <div key={group.label}>
-              <div className="flex justify-center my-4">
-                <span className="text-[10px] bg-secondary text-muted-foreground px-3 py-1 rounded-full font-medium">
+              <div className="my-3 flex justify-center">
+                <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-medium text-muted-foreground">
                   {group.label}
                 </span>
               </div>
@@ -98,19 +96,19 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
                 <div
                   key={msg.id}
                   className={cn(
-                    "flex mb-2.5",
+                    "mb-2 flex",
                     msg.direction === "inbound" ? "justify-start" : "justify-end"
                   )}
                 >
                   <div
                     className={cn(
-                      "max-w-[72%] rounded-2xl px-3.5 py-2 text-sm",
+                      "max-w-[70%] rounded-2xl px-3 py-2 text-sm",
                       msg.direction === "inbound"
-                        ? "bg-card border border-border rounded-bl-md text-foreground shadow-card"
-                        : "bg-primary text-primary-foreground rounded-br-md shadow-sm"
+                        ? "rounded-bl-md border border-border bg-card text-foreground shadow-card"
+                        : "rounded-br-md bg-primary text-primary-foreground shadow-sm"
                     )}
                   >
-                    <p className="whitespace-pre-wrap break-words leading-relaxed text-[13px]">
+                    <p className="whitespace-pre-wrap break-words text-[13px] leading-relaxed">
                       {msg.message_text}
                     </p>
                     {msg.media_url && (
@@ -120,7 +118,7 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
                     )}
                     <p
                       className={cn(
-                        "text-[10px] mt-1 text-right",
+                        "mt-1 text-right text-[10px]",
                         msg.direction === "inbound"
                           ? "text-muted-foreground"
                           : "text-primary-foreground/60"
@@ -136,8 +134,7 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
         </div>
       </div>
 
-      {/* Input */}
-      <div className="border-t border-border px-4 py-3 bg-card shrink-0">
+      <div className="shrink-0 border-t border-border bg-card px-3 py-2">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -146,16 +143,16 @@ export function ChatPanel({ conversation, messages, onSend, sending }: Props) {
               setText("");
             }
           }}
-          className="flex gap-2 items-center"
+          className="flex items-center gap-2"
         >
           <Input
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Digite uma mensagem..."
-            className="flex-1 h-10 bg-secondary/50 border-transparent focus:border-border"
+            className="h-9 flex-1 border-border bg-background"
             autoFocus
           />
-          <Button type="submit" size="icon" className="h-10 w-10 shrink-0 rounded-xl" disabled={!text.trim() || sending}>
+          <Button type="submit" size="icon" className="h-9 w-9 shrink-0 rounded-xl" disabled={!text.trim() || sending}>
             <Send className="h-4 w-4" />
           </Button>
         </form>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, KanbanSquare, MapPin } from "lucide-react";
+import { CalendarDays, KanbanSquare, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -153,12 +153,14 @@ export function CrmInboxPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {selectedLeadSnapshot && (
-          <div className="border-b border-border bg-card/80 px-4 py-3 backdrop-blur-sm">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        {selectedLeadSnapshot ? (
+          <div className="border-b border-border bg-card/70 px-4 py-2 backdrop-blur-sm">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="truncate text-sm font-semibold text-foreground">{selectedLeadSnapshot.name}</p>
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {selectedLeadSnapshot.name}
+                  </p>
                   <Badge variant="secondary" className="text-[10px] font-medium">
                     {selectedLeadSnapshot.stage}
                   </Badge>
@@ -168,28 +170,48 @@ export function CrmInboxPage() {
                     </Badge>
                   )}
                 </div>
-                <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-                  <span>{selectedLeadSnapshot.phone}</span>
+
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <Phone className="h-3 w-3" />
+                    {selectedLeadSnapshot.phone}
+                  </span>
                   <span>Último toque: {selectedLeadSnapshot.lastTouch}</span>
-                  {selectedLeadSnapshot.location && <span>{selectedLeadSnapshot.location}</span>}
+                  {selectedLeadSnapshot.location && (
+                    <span>{selectedLeadSnapshot.location}</span>
+                  )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 xl:w-auto">
-                <Button size="sm" className="gap-2" onClick={handleAgendaShortcut}>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <Button size="sm" className="h-8 gap-2" onClick={handleAgendaShortcut}>
                   <CalendarDays className="h-4 w-4" />
                   Agenda
                 </Button>
-                <Button size="sm" variant="outline" className="gap-2" onClick={() => (window.location.href = "/app/pipeline")}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 gap-2"
+                  onClick={() => (window.location.href = "/app/pipeline")}
+                >
                   <KanbanSquare className="h-4 w-4" />
                   Pipeline
                 </Button>
-                <Button size="sm" variant="outline" className="gap-2" onClick={() => (window.location.href = "/app/map")}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 gap-2"
+                  onClick={() => (window.location.href = "/app/map")}
+                >
                   <MapPin className="h-4 w-4" />
                   Mapa
                 </Button>
               </div>
             </div>
+          </div>
+        ) : (
+          <div className="border-b border-border bg-card/70 px-4 py-2 text-sm text-muted-foreground">
+            Selecione uma conversa para trabalhar o funil.
           </div>
         )}
 
