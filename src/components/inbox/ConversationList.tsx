@@ -36,7 +36,7 @@ export function ConversationList({ conversations, selectedId, stages, onSelect }
   );
 
   return (
-    <div className="flex w-[17rem] shrink-0 flex-col border-r border-border bg-card xl:w-[18rem]">
+    <div className="flex h-full min-w-0 flex-col bg-card">
       <div className="space-y-2 border-b border-border px-3 py-3">
         <h2 className="text-sm font-semibold text-foreground">Conversas</h2>
 
