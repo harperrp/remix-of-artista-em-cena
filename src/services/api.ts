@@ -16,19 +16,7 @@ type LeadMessageRow = Database["public"]["Tables"]["lead_messages"]["Row"];
 type CalendarEventRow = Database["public"]["Tables"]["calendar_events"]["Row"];
 type CalendarEventInsert = Database["public"]["Tables"]["calendar_events"]["Insert"];
 
-type LeadConversationRow = Pick<
-  LeadRow,
-  | "id"
-  | "organization_id"
-  | "contractor_name"
-  | "stage"
-  | "contact_phone"
-  | "whatsapp_phone"
-  | "last_message"
-  | "last_message_at"
-  | "unread_count"
-  | "created_at"
->;
+type ConversationRow = Database["public"]["Tables"]["conversations"]["Row"];
 
 function assertRequiredId(value: string | null | undefined, label: string): string {
   if (!value) {
